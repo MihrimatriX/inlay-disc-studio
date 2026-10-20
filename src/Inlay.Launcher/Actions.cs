@@ -30,10 +30,12 @@ public interface IShellProcess
     Task<int> WaitForExitAsync();
 }
 
-public sealed record RunResult(int? ExitCode);
+/// <summary><c>CanRunInstalled</c>: an install action succeeded and its app's installed exe was found (disc.runInstalled).</summary>
+public sealed record RunResult(int? ExitCode, bool? CanRunInstalled = null);
 
 /// <summary>Runs manifest actions — and only those (§9.3). Page input is an action id, never a path.</summary>
-public sealed class ActionRunner(DiscManifest manifest, string root, IShell shell, Action<string, object> emit, Action closeLauncher)
+public sealed class ActionRunner(DiscManifest manifest, string root, IShell shell, Action<string, object> emit, Action closeLauncher,
+    IUninstallRegistry? installed = null)
 {
     /// <summary>Installer exit codes that mean success: done, "a newer version is already installed" (VC++), reboot needed.</summary>
     public static bool Succeeded(int exitCode) => exitCode is 0 or 1638 or 3010;
@@ -80,7 +82,7 @@ public sealed class ActionRunner(DiscManifest manifest, string root, IShell shel
                 var result = await runSteps(steps);
                 var exit = result.Failed.FirstOrDefault()?.ExitCode ?? 0;
                 emit("action-exited", new ActionEvent(action.Id, exit));
-                return Finish(exit);
+                return Finish(action, exit);
             }
 
             var (file, args) = Command(action, silent: false);
@@ -91,12 +93,29 @@ public sealed class ActionRunner(DiscManifest manifest, string root, IShell shel
             var code = await process.WaitForExitAsync();
             emit("action-exited", new ActionEvent(action.Id, code));
             if (action.CloseLauncher == CloseLauncher.OnExit) closeLauncher();
-            return Finish(code);
+            return Finish(action, code);
         }
         finally { _running.TryRemove(action.Id, out _); }
     }
 
-    static RunResult Finish(int exitCode) => exitCode == 3010 ? throw new BridgeError("reboot-required") : new RunResult(exitCode);
+    RunResult Finish(DiscAction action, int exitCode)
+    {
+        if (exitCode == 3010) throw new BridgeError("reboot-required");
+        var canRun = action.Kind == ActionKind.Install && Succeeded(exitCode) && OwnerOf(action.Id) is { } app && InstalledExe(app) is not null;
+        return new RunResult(exitCode, canRun ? true : null);
+    }
+
+    /// <summary>Starts the installed copy of an app (disc.runInstalled). The exe comes from the registry, never from the page.</summary>
+    public RunResult RunInstalled(string? appId)
+    {
+        var app = manifest.Items.OfType<App>().FirstOrDefault(a => a.Id == appId) ?? throw new BridgeError("unknown-action");
+        var exe = InstalledExe(app) ?? throw new BridgeError("not-found");
+        shell.Start(exe, "", Path.GetDirectoryName(exe), elevated: false);
+        emit("action-started", new ActionEvent(app.Id, null));
+        return new RunResult(null);
+    }
+
+    string? InstalledExe(App app) => installed is null ? null : InstalledApps.FindExe(app, installed);
 
     public App? OwnerOf(string actionId) => manifest.Items.OfType<App>().FirstOrDefault(a => a.Actions?.Contains(actionId) == true);
 

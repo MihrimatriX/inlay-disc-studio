@@ -53,6 +53,8 @@ public sealed class Bridge(ActionRunner actions, BundleRunner bundles, DiscManif
         {
             case "run":
                 return Json(await actions.Run(id, bundles.Run), LauncherJson.Default.RunResult);
+            case "runInstalled":
+                return Json(actions.RunInstalled(id), LauncherJson.Default.RunResult);
             case "installBundle":
                 var ids = opts.ValueKind == JsonValueKind.Object && opts.TryGetProperty("appIds", out var a) && a.ValueKind == JsonValueKind.Array
                     ? a.EnumerateArray().Select(x => x.GetString() ?? "").ToList()

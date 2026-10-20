@@ -256,7 +256,12 @@ export function createSdk(boot: Boot, transport: Transport | null): DiscSdk {
         else location.href = relUrl(action.target!, false);
         return {};
       }
-      return request<{ exitCode?: number }>("run", actionId);
+      return request<{ exitCode?: number; canRunInstalled?: boolean }>("run", actionId);
+    },
+
+    async runInstalled(appId) {
+      if (!hosted) throw new DiscError("not-found");
+      return request<{ exitCode?: number }>("runInstalled", appId);
     },
 
     installBundle: (appIds) => request("installBundle", undefined, { appIds }),

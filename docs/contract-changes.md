@@ -40,3 +40,12 @@ every change is additive and optional for consumers.
   and the launcher stops forwarding XInput `gamepad` events.
 - **SDK boot** `__inlayBoot.preview: true` (builder only): the SDK talks to a stand-in launcher (ADR 0013) instead of
   `chrome.webview`. Discs never carry it.
+
+## After M7
+
+- **SDK/Bridge** `run(id)` of an install action may answer `canRunInstalled: true`: the installer succeeded and the
+  launcher found the app's installed copy in the Uninstall keys (HKLM/HKCU, 64- and 32-bit views; DisplayName must
+  contain the app title, a differing Publisher rules an entry out; the exe is DisplayIcon or the best exe in
+  InstallLocation). New command `runInstalled` / `disc.runInstalled(appId)` starts that exe. The page passes only the
+  app id; the path never leaves the launcher. The standard runtime uses it so "Oyna" works on installer-only game
+  discs (§7.0). Both additive; the manifest schema is unchanged.

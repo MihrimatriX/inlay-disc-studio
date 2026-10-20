@@ -29,6 +29,16 @@ describe("disc sdk", () => {
     await expect(done).resolves.toEqual({ exitCode: 0 });
   });
 
+  test("runInstalled sends only the app id; unhosted menus have no installed copy to start", async () => {
+    const host = fakeHost();
+    const sdk = createSdk({ manifest: manifest("bundle"), hosted: true }, host.transport);
+    const done = sdk.runInstalled("ap-game");
+    expect(host.sent).toEqual([{ v: 1, req: 1, cmd: "runInstalled", id: "ap-game", opts: undefined }]);
+    host.reply({ v: 1, res: 1, ok: true, data: {} });
+    await expect(done).resolves.toEqual({});
+    await expect(createSdk({ manifest: manifest("bundle"), hosted: false }, null).runInstalled("ap-game")).rejects.toMatchObject({ code: "not-found" });
+  });
+
   test("launcher errors become DiscError codes and replies are matched by req", async () => {
     const host = fakeHost();
     const sdk = createSdk({ manifest: manifest("bundle"), hosted: true }, host.transport);

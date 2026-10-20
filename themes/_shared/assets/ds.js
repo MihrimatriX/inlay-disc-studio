@@ -179,10 +179,14 @@
     if (busyText && disc.hosted) toast(busyText);
     try {
       const r = await disc.run(id);
-      if (a.kind === "install" && r?.exitCode === 0 && button?.dataset.then) {
-        // §7.0: after installing, the primary action becomes "Oyna".
-        const then = actionsById[button.dataset.then];
-        button.dataset.action = then.id;
+      const canRunInstalled = r?.canRunInstalled && button?.dataset.installs;
+      if (a.kind === "install" && (canRunInstalled || (r?.exitCode === 0 && button?.dataset.then))) {
+        // §7.0: after installing, the primary action becomes "Oyna": the installed copy when the launcher
+        // found it, otherwise the disc's portable run action.
+        if (canRunInstalled) {
+          delete button.dataset.action;
+          button.dataset.runInstalled = button.dataset.installs;
+        } else button.dataset.action = button.dataset.then;
         button.querySelector("span").textContent = T("ui.playGame");
         button.querySelector("use")?.setAttribute("href", "#i-play");
         toast(T("ui.installed"));
@@ -206,6 +210,10 @@
       return;
     }
     if (d.action) return run(t, d.action);
+    if (d.runInstalled) {
+      toast(T("ui.starting"));
+      return disc.runInstalled(d.runInstalled).catch((err) => toast(errorText(err?.code)));
+    }
     if (d.play) return disc.play(d.play, { startSec: d.start ? +d.start : undefined, fullscreen: true }).catch((err) => toast(errorText(err?.code)));
     if (d.playFile) return disc.play(d.playFile, { fullscreen: true }).catch((err) => toast(errorText(err?.code)));
     if (d.track) return disc.playlist(d.album, d.track).catch((err) => toast(errorText(err?.code)));

@@ -26,6 +26,7 @@ export function previewTransport(manifest: DiscManifest): Transport {
             locale: manifest.disc.locale ?? "tr-TR",
           });
         case "run":
+        case "runInstalled":
           return reply(req, { exitCode: 0 });
         case "installBundle":
           return reply(req, { installed: opts?.appIds ?? [], failed: [] });

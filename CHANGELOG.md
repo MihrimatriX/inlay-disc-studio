@@ -1,5 +1,10 @@
 # Changelog
 
+## Installed games start from the disc
+
+- Installer-only game discs: after "Kur" succeeds the primary button becomes "Oyna" and starts the installed copy,
+  found through the registry Uninstall keys (`disc.runInstalled`, docs/contract-changes.md).
+
 ## Media is not converted by default
 
 - `NormalizationPlanner`: with "Maksimum uyumluluk" off (the default), audio and video go on the disc untouched; WebView2

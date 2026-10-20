@@ -83,7 +83,17 @@ export interface DiscSdk {
   readonly theme: { palette: DiscPalette; settings: Record<string, string | number | boolean> };
 
   /** manifest.actions[].id çalıştırır (install/run/open/openFolder/url). */
-  run(actionId: string): Promise<{ exitCode?: number }>;
+  run(actionId: string): Promise<{
+    exitCode?: number;
+    /** install action'ı başarılıysa ve app'in kurulu kopyası (Uninstall kayıtları) bulunduysa true: runInstalled kullanılabilir. */
+    canRunInstalled?: boolean;
+  }>;
+
+  /**
+   * App'in bilgisayara kurulu kopyasını başlatır (kurulumdan sonra "Oyna", §7.0). Exe yolunu launcher
+   * kayıt defterindeki Uninstall girdilerinden bulur; sayfa yalnızca app id'si verir. Bulunamazsa "not-found".
+   */
+  runInstalled(appId: string): Promise<{ exitCode?: number }>;
 
   /**
    * Program paketi: seçilen app id'lerini sırayla kurar (önce bundle.required olanlar, sonra bundle.order).

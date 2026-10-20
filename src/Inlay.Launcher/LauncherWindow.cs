@@ -142,7 +142,7 @@ sealed partial class LauncherWindow : IBridgeHost
         wv.add_WebResourceRequested(new WebResourceRequested((_, args) => BlockNetwork(args!)), out _);
 
         var shell = new WindowsShell(Confirm);
-        var actions = new ActionRunner(manifest, _root, shell, Emit, Close);
+        var actions = new ActionRunner(manifest, _root, shell, Emit, Close, new WindowsUninstallRegistry());
         var bundles = new BundleRunner(_root, actions, shell, p => Emit("bundle-progress", p));
         _bridge = new Bridge(actions, bundles, manifest, this);
         wv.add_WebMessageReceived(new WebMessageReceived((sender, args) =>
