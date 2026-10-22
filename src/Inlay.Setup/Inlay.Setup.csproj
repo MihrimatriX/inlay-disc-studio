@@ -8,7 +8,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationIcon>Inlay.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <!-- A few MB of native code around the payload: no .NET runtime is needed to install the (self-contained) builder. -->
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>false</InvariantGlobalization>
