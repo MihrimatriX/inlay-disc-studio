@@ -1,0 +1,41 @@
+{%- comment -%} Series page (§7.0): backdrop, "İzle / Devam et: S1 B3", season tabs, 16:9 episode list. {%- endcomment -%}
+{%- assign bg = item.backdrop | default: item.cover -%}
+{%- assign first_season = item.seasons | first -%}
+{%- assign first_episode = first_season.episodes | first -%}
+{%- assign summary = item.overview | split: '. ' | first -%}
+{%- assign last = summary | slice: -1 -%}
+<section class="view movie" id="v-{{ item.id }}" data-kind="series" data-label="{{ item.title }}" hidden>
+  {%- if bg -%}<img class="stage-img" src="{{ bg | relurl }}" alt="">{%- endif -%}
+  <div class="shade" aria-hidden="true"></div>
+  {%- include 'partials/top' -%}
+  <section class="hero">
+    <span class="meta">{{ item.yearFrom }}{% if item.yearTo and item.yearTo != item.yearFrom %}–{{ item.yearTo }}{% endif %}{% if item.genres %} · {{ item.genres | first }}{% endif %} · {{ 'ui.seasons' | t: item.seasons.size }}</span>
+    {%- if item.logo -%}<h1 class="title"><img class="logo" src="{{ item.logo | relurl }}" alt="{{ item.title }}"></h1>
+    {%- else -%}<h1 class="title{% if item.title.size > 22 %} long{% endif %}">{{ item.title }}</h1>{%- endif -%}
+    {%- if summary != blank -%}<p class="summary">{{ summary }}{% unless '.!?…' contains last %}.{% endunless %}</p>{%- endif -%}
+    <div class="actions">
+      <button class="btn primary" data-play="{{ first_episode.id }}" data-next-episode="{{ item.id }}"><svg><use href="#i-play"/></svg><span>{{ 'ui.watchEpisode' | t: first_season.no, first_episode.no }}</span></button>
+      <button class="btn" data-sheet="s-{{ item.id }}">{{ 'ui.episodes' | t }}</button>
+    </div>
+  </section>
+  <div class="sheet" id="s-{{ item.id }}" role="dialog" aria-label="{{ item.title }}">
+    {%- if item.seasons.size > 1 -%}
+    <div class="tabs" role="tablist">
+      {%- for s in item.seasons -%}
+      <button class="tab" role="tab" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" data-tab="t-{{ item.id }}-{{ s.no }}">{{ s.title | default: s.no }}</button>
+      {%- endfor -%}
+    </div>
+    {%- endif -%}
+    {%- for s in item.seasons -%}
+    <div class="strip" role="tabpanel" id="t-{{ item.id }}-{{ s.no }}" {% unless forloop.first %}hidden{% endunless %}>
+      {%- for e in s.episodes -%}
+      <button class="episode" data-play="{{ e.id }}" data-episode="{{ s.no }}-{{ e.no }}">
+        {%- if e.thumb -%}<img src="{{ e.thumb | relurl }}" alt="" loading="lazy">{%- else -%}<div class="thumb-ph"></div>{%- endif -%}
+        <span>{{ e.no }}. {{ e.title }}</span><small>{{ e.media.durationSec | duration }}</small>
+        <div class="bar"><i style="width:0"></i></div>
+      </button>
+      {%- endfor -%}
+    </div>
+    {%- endfor -%}
+  </div>
+</section>

@@ -1,0 +1,159 @@
+{
+  "$schema": "../schemas/manifest.schema.json",
+  "version": 1,
+  "disc": {
+    "label": "OFIS_GUNLUKLERI",
+    "title": "Ofis Günlükleri",
+    "media": "dvd9",
+    "createdAt": "2026-10-17T12:00:00Z",
+    "builder": "DiscStudio 0.1.0",
+    "locale": "tr-TR",
+    "icon": ".disc/icon.ico",
+    "home": {
+      "view": "series",
+      "item": "sr-ofis"
+    }
+  },
+  "theme": {
+    "package": "ds.standard.mixed",
+    "version": "1.0.0",
+    "palette": {
+      "bg": "#0b0d14",
+      "surface": "#161a26",
+      "accent": "#ffcf6b",
+      "accentText": "#1c0f02",
+      "text": "#f2f1ee",
+      "muted": "#9aa0b1"
+    }
+  },
+  "sections": [
+    {
+      "id": "sec-series",
+      "kind": "series",
+      "title": "Bölümler",
+      "items": [
+        "sr-ofis"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "sr-ofis",
+      "type": "series",
+      "title": "Ofis Günlükleri",
+      "overview": "Küçük bir oyun stüdyosunun gündelik kaosu.",
+      "genres": [
+        "Komedi"
+      ],
+      "yearFrom": 2025,
+      "yearTo": 2026,
+      "cover": "Dizi/poster.webp",
+      "backdrop": "Dizi/backdrop.webp",
+      "seasons": [
+        {
+          "no": 1,
+          "episodes": [
+            {
+              "id": "s1e1",
+              "no": 1,
+              "title": "Pilot",
+              "thumb": "Dizi/S01/e01.webp",
+              "media": {
+                "file": "Dizi/S01/S01E01.mp4",
+                "sizeBytes": 420000000,
+                "container": "mp4",
+                "durationSec": 1440,
+                "video": {
+                  "codec": "h264",
+                  "width": 1920,
+                  "height": 1080
+                },
+                "audio": [
+                  {
+                    "codec": "aac",
+                    "lang": "tr",
+                    "channels": 2
+                  }
+                ],
+                "playback": {
+                  "engine": "html"
+                }
+              }
+            },
+            {
+              "id": "s1e2",
+              "no": 2,
+              "title": "Teslim Gecesi",
+              "thumb": "Dizi/S01/e02.webp",
+              "media": {
+                "file": "Dizi/S01/S01E02.mp4",
+                "sizeBytes": 410000000,
+                "container": "mp4",
+                "durationSec": 1380,
+                "video": {
+                  "codec": "h264",
+                  "width": 1920,
+                  "height": 1080
+                },
+                "audio": [
+                  {
+                    "codec": "aac",
+                    "lang": "tr",
+                    "channels": 2
+                  }
+                ],
+                "playback": {
+                  "engine": "html"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "episodes": [
+            {
+              "id": "s2e1",
+              "no": 1,
+              "title": "Yeni Ofis",
+              "thumb": "Dizi/S02/e01.webp",
+              "media": {
+                "file": "Dizi/S02/S02E01.mp4",
+                "sizeBytes": 415000000,
+                "container": "mp4",
+                "durationSec": 1440,
+                "video": {
+                  "codec": "h264",
+                  "width": 1920,
+                  "height": 1080
+                },
+                "audio": [
+                  {
+                    "codec": "aac",
+                    "lang": "tr",
+                    "channels": 2
+                  }
+                ],
+                "playback": {
+                  "engine": "html"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "actions": [
+        "play-next"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "play-next",
+      "label": "İzle",
+      "icon": "play",
+      "kind": "play",
+      "target": "sr-ofis"
+    }
+  ]
+}

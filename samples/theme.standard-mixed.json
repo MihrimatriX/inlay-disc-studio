@@ -1,0 +1,114 @@
+{
+  "$schema": "../schemas/theme.schema.json",
+  "id": "ds.standard.mixed",
+  "name": "Hepsi",
+  "version": "1.0.0",
+  "author": "Inlay Disc Studio",
+  "description": "Film, müzik, fotoğraf ve programları tek ekranda toplayan ana menü.",
+  "license": "MIT",
+  "modes": [
+    "mixed",
+    "movie",
+    "album",
+    "gallery",
+    "app"
+  ],
+  "engine": "liquid",
+  "entry": "index.liquid",
+  "partials": [
+    "partials/views.liquid",
+    "partials/menu.liquid",
+    "partials/collection.liquid",
+    "partials/movie.liquid",
+    "partials/series.liquid",
+    "partials/album.liquid",
+    "partials/gallery.liquid",
+    "partials/app.liquid",
+    "partials/bundle.liquid",
+    "partials/file.liquid",
+    "partials/card.liquid",
+    "partials/top.liquid",
+    "partials/about.liquid",
+    "partials/icons.liquid"
+  ],
+  "minLauncher": "0.1.0",
+  "capabilities": [
+    "play",
+    "playlist",
+    "slideshow",
+    "run",
+    "install",
+    "openFolder",
+    "url",
+    "gamepad",
+    "intro",
+    "fullscreen"
+  ],
+  "fonts": [
+    {
+      "family": "Outfit",
+      "file": "fonts/Outfit-latin.woff2",
+      "weight": "100 900"
+    },
+    {
+      "family": "Outfit",
+      "file": "fonts/Outfit-latin-ext.woff2",
+      "weight": "100 900"
+    }
+  ],
+  "settings": {
+    "primary": {
+      "type": "select",
+      "label": "Birincil buton",
+      "group": "Renk",
+      "default": "cream",
+      "options": [
+        {
+          "value": "cream",
+          "label": "Krem"
+        },
+        {
+          "value": "amber",
+          "label": "Kehribar"
+        },
+        {
+          "value": "ice",
+          "label": "Buz mavisi"
+        }
+      ]
+    },
+    "accent": {
+      "type": "color",
+      "label": "Vurgu rengi",
+      "group": "Renk",
+      "default": "auto:accent",
+      "help": "Otomatik: öne çıkan görselden çıkarılır."
+    }
+  },
+  "sections": {
+    "movie": {
+      "layout": "row",
+      "title": "Filmler"
+    },
+    "album": {
+      "layout": "row",
+      "title": "Müzik"
+    },
+    "gallery": {
+      "layout": "grid",
+      "title": "Fotoğraflar"
+    },
+    "app": {
+      "layout": "row",
+      "title": "Oyunlar ve Programlar"
+    },
+    "file": {
+      "layout": "list",
+      "title": "Belgeler"
+    }
+  },
+  "budget": {
+    "maxAssetsMb": 4,
+    "maxFirstPaintMs": 800
+  }
+}

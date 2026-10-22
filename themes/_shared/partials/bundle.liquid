@@ -1,0 +1,29 @@
+{%- comment -%}
+  Program bundle (§7.0, §4.5): checkbox list on the same stage, required rows locked and installed first,
+  "N program seçildi · toplam boyut" + "Seçilenleri kur", row-by-row progress.
+{%- endcomment -%}
+{%- assign hero = nil -%}
+{%- for item in all_items -%}{%- if item.type == 'app' and hero == nil -%}{%- assign hero = item.backdrop | default: item.cover -%}{%- endif -%}{%- endfor -%}
+<section class="view bundle" id="v-bundle" data-kind="bundle" data-label="{{ disc.title }}" hidden>
+  {%- if hero -%}<img class="stage-img" src="{{ hero | relurl }}" alt="">{%- endif -%}
+  <div class="shade" aria-hidden="true"></div>
+  {%- include 'partials/top' -%}
+  <h1>{{ disc.title }}</h1>
+  <div class="list" role="group" aria-label="{{ disc.title }}">
+    {%- for item in all_items -%}{%- if item.type == 'app' -%}
+    <button class="pkg{% if item.bundle.required %} locked{% endif %}" role="checkbox" data-pkg="{{ item.id }}"
+            data-order="{% if item.bundle.required %}-1{% else %}{{ item.bundle.order | default: 99 }}{% endif %}" data-size="{{ item.installSizeBytes | default: 0 }}"
+            aria-checked="{% if item.bundle.required or item.bundle.selected != false %}true{% else %}false{% endif %}"{% if item.bundle.required %} aria-disabled="true"{% endif %}>
+      <span class="box"><svg><use href="#i-check"/></svg></span>
+      {%- if item.icon -%}<img src="{{ item.icon | relurl }}" alt="">{%- elsif item.cover -%}<img src="{{ item.cover | relurl }}" alt="">{%- else -%}<span class="ph"></span>{%- endif -%}
+      <span><b>{{ item.title }}{% if item.bundle.required %}<span class="tag">{{ 'ui.required' | t }}</span>{% endif %}</b>
+        <small>{{ item.version }}{% if item.version and item.installSizeBytes %} · {% endif %}{% if item.installSizeBytes %}{{ item.installSizeBytes | filesize }}{% endif %}</small></span>
+      <span class="state" data-state></span>
+    </button>
+    {%- endif -%}{%- endfor -%}
+  </div>
+  <div class="bundlebar">
+    <span id="bundle-sum"></span>
+    <button class="btn primary" id="bundle-install"><svg><use href="#i-install"/></svg><span>{{ 'ui.installSelected' | t }}</span></button>
+  </div>
+</section>

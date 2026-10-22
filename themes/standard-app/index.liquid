@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="{{ disc.locale | default: 'tr-TR' | slice: 0, 2 }}" data-theme="app" data-primary="{{ settings.primary | default: 'cream' }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ disc.title }}</title>
+<link rel="preload" href="fonts/Outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/ds.css">
+</head>
+<body class="ds">
+{%- comment -%} "Oyun" — Tam ekran oyun görseli, uyumluluk satırı, Kur ve Kurmadan oyna; program paketleri için onay kutulu liste. Shared views live in partials/ (themes/_shared). {%- endcomment -%}
+{% include 'partials/views' %}
+<script src="assets/ds.js"></script>
+</body>
+</html>

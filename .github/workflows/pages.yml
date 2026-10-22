@@ -1,0 +1,28 @@
+name: pages
+# The product site (site/) on GitHub Pages: built with scripts/build-site.mjs, which fills in this repository's name,
+# the version and the "latest release" download link.
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "scripts/build-site.mjs", "src/Inlay.Setup/Inlay.Setup.csproj", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency: { group: pages, cancel-in-progress: true }
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: "${{ steps.deployment.outputs.page_url }}" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node scripts/build-site.mjs
+        env: { GITHUB_REPOSITORY: "${{ github.repository }}" }
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: artifacts/site }
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,27 @@
+{%- comment -%} "Galeri" (design/screens/t3-fotograf, §4.4): light stage, edge-to-edge mosaic; wide shots span 2 columns, tall ones 2 rows. {%- endcomment -%}
+<section class="view gallery light" id="v-{{ item.id }}" data-kind="gallery" data-label="{{ item.title }}" hidden>
+  <header>
+    <div>
+      {%- include 'partials/top' -%}
+      <h1>{{ item.title }}</h1>
+      {%- assign y1 = item.dateRange.from | date: '%Y' -%}{%- assign y2 = item.dateRange.to | date: '%Y' -%}
+      {%- assign m1 = item.dateRange.from | date: '%B %Y' -%}{%- assign m2 = item.dateRange.to | date: '%B %Y' -%}
+      {%- if y1 == y2 -%}{%- assign m1 = item.dateRange.from | date: '%B' -%}{%- endif -%}
+      <span class="sub">{% if item.dateRange.from %}{% if m2 != blank and item.dateRange.to != item.dateRange.from %}{{ m1 }} – {{ m2 }}{% else %}{{ m2 | default: m1 }}{% endif %} · {% endif %}{{ 'ui.photos' | t: item.photos.size }}</span>
+    </div>
+    {%- for id in item.actions -%}{%- if forloop.first -%}
+    <button class="btn dark" data-action="{{ id }}"><svg><use href="#i-play"/></svg><span>{{ 'ui.slideshow' | t }}</span></button>
+    {%- endif -%}{%- endfor -%}
+  </header>
+  <div class="mosaic">
+    {%- for p in item.photos -%}
+    {%- assign wide = p.width | times: 10 | divided_by: p.height -%}
+    {%- assign tall = p.height | times: 10 | divided_by: p.width -%}
+    <button class="tile{% if wide >= 13 %} wide{% elsif tall >= 13 %} tall{% endif %}" data-photo="{{ forloop.index0 }}" data-gallery="{{ item.id }}" aria-label="{{ p.caption | default: p.id }}">
+      <img src="{% if wide >= 13 or tall >= 13 %}{{ p.file | relurl }}{% else %}{{ p.thumb | relurl }}{% endif %}" alt="" loading="lazy" decoding="async">
+      {%- if p.kind == 'video' -%}<span class="badge"><svg><use href="#i-play"/></svg>{{ p.media.durationSec | clock }}</span>{%- endif -%}
+    </button>
+    {%- endfor -%}
+  </div>
+  <script type="application/json" id="g-{{ item.id }}">{"interval":{{ item.slideshow.intervalMs | default: 5000 | json }},"transition":{{ item.slideshow.transition | default: 'kenburns' | json }},"music":{{ item.slideshow.music | json }},"photos":{{ item.photos | json }}}</script>
+</section>

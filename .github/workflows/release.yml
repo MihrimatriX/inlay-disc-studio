@@ -1,0 +1,52 @@
+name: release
+# A tag "vX.Y.Z" builds InlaySetup.exe (scripts/package-installer.ps1) and publishes it as a GitHub release. The asset
+# is always named InlaySetup.exe, so .../releases/latest/download/InlaySetup.exe (the site's button) stays valid.
+# Signing: store a code-signing certificate as the secrets SIGN_PFX_BASE64 and SIGN_PASSWORD; without them the
+# setup is unsigned and the release notes say so.
+on:
+  push:
+    tags: ["v*.*.*"]
+permissions:
+  contents: write
+jobs:
+  setup:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { global-json-file: global.json }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run build
+      - name: FFmpeg (LGPL build)
+        shell: bash
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          gh release download latest --repo BtbN/FFmpeg-Builds -p 'ffmpeg-n8.1-latest-win64-lgpl-shared-8.1.zip' -p checksums.sha256 -D tools/dl
+          (cd tools/dl && grep 'n8.1-latest-win64-lgpl-shared-8.1.zip' checksums.sha256 | sha256sum -c -)
+          unzip -q tools/dl/*.zip -d tools && mv tools/ffmpeg-n8.1-latest-win64-lgpl-shared-8.1 tools/ffmpeg
+      - name: Launcher (NativeAOT)
+        shell: pwsh
+        run: dotnet publish src/Inlay.Launcher -c Release -o artifacts/launcher
+      - name: Installer
+        shell: pwsh
+        env:
+          SIGN_PFX_BASE64: ${{ secrets.SIGN_PFX_BASE64 }}
+          INLAY_SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          if ($env:SIGN_PFX_BASE64) {
+            $pfx = Join-Path $env:RUNNER_TEMP "sign.pfx"
+            [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:SIGN_PFX_BASE64))
+            $env:INLAY_SIGN_PFX = $pfx
+          }
+          ./scripts/package-installer.ps1 -Version $version
+          Copy-Item "artifacts/InlaySetup-$version.exe" artifacts/InlaySetup.exe
+      - name: Release
+        shell: pwsh
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          $signed = if ("${{ secrets.SIGN_PFX_BASE64 }}") { "İmzalı." } else { "Bu sürüm imzasız: Windows SmartScreen çalıştırmadan önce sorar (Ek bilgi › Yine de çalıştır)." }
+          $notes = "Windows 10/11 için kurulum dosyası. Yönetici izni gerekmez. $signed`n`nDeğişiklikler: CHANGELOG.md"
+          gh release create "${{ github.ref_name }}" artifacts/InlaySetup.exe --title "Inlay Disc Studio ${{ github.ref_name }}" --notes $notes

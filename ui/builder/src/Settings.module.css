@@ -1,0 +1,30 @@
+.backdrop { position: fixed; inset: 0; z-index: 30; background: rgba(8, 8, 10, 0.55); backdrop-filter: blur(6px); display: grid; place-items: center; }
+.dialog {
+  width: 620px;
+  max-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 30px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(34, 35, 41, 0.94), rgba(24, 25, 29, 0.94));
+  backdrop-filter: blur(30px);
+  box-shadow: var(--shadow-dialog), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+.body { overflow-y: auto; display: flex; flex-direction: column; gap: 26px; padding-right: 6px; }
+.group { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 12px; }
+.group legend { margin-bottom: 12px; }
+.accents { display: flex; gap: 18px; }
+.accent { display: flex; align-items: center; gap: 8px; color: var(--text-2); min-height: 40px; }
+.accent input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+.sw { width: 18px; height: 18px; border-radius: 50%; }
+.swOrange { composes: sw; background: linear-gradient(135deg, #ff8a3d, #ff5a1f); }
+.swBlue { composes: sw; background: linear-gradient(135deg, #7c9dff, #4c7dff); }
+.swPurple { composes: sw; background: linear-gradient(135deg, #c084fc, #a855f7); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 40px; }
+.row small { display: block; color: var(--faint); font-size: 13px; }
+.field { display: flex; flex-direction: column; gap: 6px; color: var(--text-2); font-size: 14px; flex: 1; }
+.key { display: flex; align-items: flex-end; gap: 8px; }
+.saved { color: var(--ok); font-style: normal; }
+.buttons { display: flex; justify-content: flex-end; }

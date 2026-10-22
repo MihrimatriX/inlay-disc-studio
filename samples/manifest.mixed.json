@@ -1,0 +1,475 @@
+{
+  "$schema": "../schemas/manifest.schema.json",
+  "version": 1,
+  "disc": {
+    "label": "SPG_COLLECTION_2026",
+    "title": "side project GAMES — Koleksiyon",
+    "subtitle": "Film · Müzik · Fotoğraf · Oyun",
+    "media": "dvd9",
+    "createdAt": "2026-10-17T12:00:00Z",
+    "builder": "DiscStudio 0.1.0",
+    "locale": "tr-TR",
+    "icon": ".disc/icon.ico",
+    "logo": ".disc/ui/assets/logo.svg",
+    "intro": {
+      "music": ".disc/ui/assets/intro.opus",
+      "durationMs": 2500,
+      "skippable": true
+    },
+    "featured": "mv-making-of",
+    "home": {
+      "view": "menu"
+    }
+  },
+  "theme": {
+    "package": "ds.standard.mixed",
+    "version": "1.0.0",
+    "settings": {
+      "accent": "auto",
+      "ambient": true,
+      "cardStyle": "poster",
+      "showCredits": true,
+      "blur": 40
+    },
+    "palette": {
+      "bg": "#0b0d14",
+      "surface": "#161a26",
+      "accent": "#ff6a3d",
+      "accentText": "#160700",
+      "text": "#f2f1ee",
+      "muted": "#9aa0b1",
+      "source": "auto"
+    }
+  },
+  "sections": [
+    {
+      "id": "sec-movies",
+      "kind": "movie",
+      "title": "Filmler",
+      "layout": "row",
+      "items": [
+        "mv-making-of"
+      ]
+    },
+    {
+      "id": "sec-music",
+      "kind": "album",
+      "title": "Müzik",
+      "layout": "row",
+      "items": [
+        "al-ost"
+      ]
+    },
+    {
+      "id": "sec-photos",
+      "kind": "gallery",
+      "title": "Fotoğraflar",
+      "layout": "grid",
+      "items": [
+        "gl-devlog"
+      ]
+    },
+    {
+      "id": "sec-apps",
+      "kind": "app",
+      "title": "Oyunlar ve Programlar",
+      "layout": "row",
+      "items": [
+        "ap-game",
+        "ap-tool"
+      ]
+    },
+    {
+      "id": "sec-docs",
+      "kind": "file",
+      "title": "Belgeler",
+      "layout": "list",
+      "items": [
+        "fl-manual"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "mv-making-of",
+      "type": "movie",
+      "title": "Yapım Hikâyesi",
+      "year": 2026,
+      "tagline": "Bir oyunun ilk satırdan Steam'e yolculuğu",
+      "overview": "Stüdyonun ilk oyununun prototipten yayına kadar geçen 18 ayını anlatan belgesel.",
+      "genres": [
+        "Belgesel"
+      ],
+      "rating": 8.4,
+      "cover": "Film/poster.webp",
+      "backdrop": "Film/backdrop.webp",
+      "cast": [
+        {
+          "name": "Ekip",
+          "character": "Kendileri"
+        }
+      ],
+      "chapters": [
+        {
+          "title": "Fikir",
+          "startSec": 0
+        },
+        {
+          "title": "Prototip",
+          "startSec": 840
+        },
+        {
+          "title": "Lansman",
+          "startSec": 3120
+        }
+      ],
+      "media": {
+        "file": "Film/yapim-hikayesi.mp4",
+        "sizeBytes": 4718592000,
+        "container": "mp4",
+        "durationSec": 4380,
+        "video": {
+          "codec": "h264",
+          "width": 1920,
+          "height": 1080,
+          "fps": 24,
+          "hdr": "none"
+        },
+        "audio": [
+          {
+            "codec": "aac",
+            "lang": "tr",
+            "channels": 2,
+            "default": true
+          }
+        ],
+        "subtitles": [
+          {
+            "lang": "en",
+            "file": "Film/yapim-hikayesi.en.vtt"
+          }
+        ],
+        "playback": {
+          "engine": "html",
+          "fallback": "libvlc",
+          "normalized": true,
+          "original": "Film/original/yapim-hikayesi.mkv"
+        }
+      },
+      "actions": [
+        "play-movie"
+      ],
+      "source": {
+        "provider": "manual"
+      }
+    },
+    {
+      "id": "al-ost",
+      "type": "album",
+      "title": "Original Soundtrack",
+      "artist": "side project GAMES",
+      "year": 2026,
+      "genre": "Synthwave",
+      "cover": "Muzik/cover.webp",
+      "audioCd": false,
+      "tracks": [
+        {
+          "id": "tr-01",
+          "no": 1,
+          "title": "Ana Tema",
+          "media": {
+            "file": "Muzik/01.flac",
+            "sizeBytes": 31000000,
+            "durationSec": 214,
+            "audio": [
+              {
+                "codec": "flac",
+                "channels": 2
+              }
+            ],
+            "playback": {
+              "engine": "html"
+            }
+          }
+        },
+        {
+          "id": "tr-02",
+          "no": 2,
+          "title": "Gece Şehri",
+          "lyrics": "Muzik/02.lrc",
+          "media": {
+            "file": "Muzik/02.flac",
+            "sizeBytes": 28000000,
+            "durationSec": 187,
+            "audio": [
+              {
+                "codec": "flac",
+                "channels": 2
+              }
+            ],
+            "playback": {
+              "engine": "html"
+            }
+          }
+        },
+        {
+          "id": "tr-03",
+          "no": 3,
+          "title": "Final Boss",
+          "media": {
+            "file": "Muzik/03.ape",
+            "sizeBytes": 26000000,
+            "durationSec": 176,
+            "audio": [
+              {
+                "codec": "ape",
+                "channels": 2
+              }
+            ],
+            "playback": {
+              "engine": "libvlc",
+              "fallback": "shell"
+            }
+          }
+        }
+      ],
+      "actions": [
+        "play-album"
+      ]
+    },
+    {
+      "id": "gl-devlog",
+      "type": "gallery",
+      "title": "Geliştirme Günlüğü",
+      "description": "Konsept çizimleri ve ofisten kareler",
+      "cover": "Fotograflar/thumbs/01.webp",
+      "dateRange": {
+        "from": "2025-03-01",
+        "to": "2026-09-30"
+      },
+      "slideshow": {
+        "intervalMs": 4000,
+        "music": "tr-01",
+        "transition": "kenburns"
+      },
+      "photos": [
+        {
+          "id": "ph-01",
+          "file": "Fotograflar/01.avif",
+          "original": "Fotograflar/original/01.heic",
+          "thumb": "Fotograflar/thumbs/01.webp",
+          "width": 4032,
+          "height": 3024,
+          "takenAt": "2025-03-14T10:22:00Z",
+          "camera": "iPhone 15 Pro",
+          "caption": "İlk konsept"
+        },
+        {
+          "id": "ph-02",
+          "file": "Fotograflar/02.avif",
+          "thumb": "Fotograflar/thumbs/02.webp",
+          "width": 3000,
+          "height": 4000,
+          "takenAt": "2025-08-02T18:05:00Z"
+        },
+        {
+          "id": "ph-03",
+          "file": "Fotograflar/03.avif",
+          "thumb": "Fotograflar/thumbs/03.webp",
+          "width": 6000,
+          "height": 4000,
+          "takenAt": "2026-01-20T09:40:00Z",
+          "camera": "Sony A7 IV"
+        },
+        {
+          "id": "ph-04",
+          "kind": "video",
+          "file": "Fotograflar/04.mp4",
+          "thumb": "Fotograflar/thumbs/04.webp",
+          "width": 1920,
+          "height": 1080,
+          "media": {
+            "file": "Fotograflar/04.mp4",
+            "sizeBytes": 52000000,
+            "durationSec": 31,
+            "playback": {
+              "engine": "html"
+            }
+          }
+        }
+      ],
+      "actions": [
+        "slideshow-devlog"
+      ]
+    },
+    {
+      "id": "ap-game",
+      "type": "app",
+      "category": "game",
+      "title": "Oyunumuz",
+      "version": "1.4.2",
+      "publisher": "side project GAMES",
+      "icon": "Setup/Game/icon.png",
+      "cover": "Setup/Game/capsule.webp",
+      "backdrop": "Setup/Game/hero.webp",
+      "description": "Steam'de yayında olan aksiyon-platform oyunu. Kurulumsuz da oynanabilir.",
+      "screenshots": [
+        "Setup/Game/ss1.webp",
+        "Setup/Game/ss2.webp"
+      ],
+      "installSizeBytes": 3200000000,
+      "requirements": {
+        "os": "Windows 10 64-bit",
+        "cpu": "4 çekirdek",
+        "ramGb": 8,
+        "gpu": "GTX 1060 / RX 580",
+        "diskGb": 4,
+        "directx": "12",
+        "prerequisites": [
+          "install-vcredist"
+        ]
+      },
+      "signature": {
+        "signed": true,
+        "signer": "side project GAMES"
+      },
+      "actions": [
+        "install-game",
+        "run-game-portable",
+        "browse-game"
+      ]
+    },
+    {
+      "id": "ap-tool",
+      "type": "app",
+      "category": "tool",
+      "title": "Seviye Editörü",
+      "version": "0.9.0",
+      "publisher": "side project GAMES",
+      "icon": "Setup/Editor/icon.png",
+      "description": "Topluluk için seviye editörü (MSI).",
+      "requirements": {
+        "os": "Windows 10/11",
+        "ramGb": 4,
+        "diskGb": 0.5
+      },
+      "signature": {
+        "signed": false
+      },
+      "actions": [
+        "install-editor"
+      ]
+    },
+    {
+      "id": "fl-manual",
+      "type": "file",
+      "title": "Kullanım Kılavuzu",
+      "path": "Belgeler/kilavuz.pdf",
+      "mime": "application/pdf",
+      "sizeBytes": 2400000,
+      "actions": [
+        "open-manual"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "play-movie",
+      "label": "İzle",
+      "icon": "play",
+      "kind": "play",
+      "target": "mv-making-of"
+    },
+    {
+      "id": "play-album",
+      "label": "Albümü Çal",
+      "icon": "music",
+      "kind": "playlist",
+      "target": "al-ost"
+    },
+    {
+      "id": "slideshow-devlog",
+      "label": "Slayt Gösterisi",
+      "icon": "image",
+      "kind": "slideshow",
+      "target": "gl-devlog"
+    },
+    {
+      "id": "install-game",
+      "label": "Kur",
+      "icon": "install",
+      "kind": "install",
+      "target": "Setup/Game/setup.exe",
+      "args": [
+        "/SILENT"
+      ],
+      "elevated": true,
+      "confirm": "Oyun bilgisayarınıza kurulacak (~3,2 GB).",
+      "closeLauncher": "never"
+    },
+    {
+      "id": "run-game-portable",
+      "label": "Diskten Oyna",
+      "icon": "play",
+      "kind": "run",
+      "target": "Setup/Game/Portable/Game.exe",
+      "workingDir": "Setup/Game/Portable",
+      "closeLauncher": "onStart"
+    },
+    {
+      "id": "browse-game",
+      "label": "Dosyalara Gözat",
+      "icon": "folder",
+      "kind": "openFolder",
+      "target": "Setup/Game"
+    },
+    {
+      "id": "install-vcredist",
+      "label": "Visual C++ Yeniden Dağıtılabilir",
+      "icon": "install",
+      "kind": "install",
+      "target": "Setup/Prereq/vc_redist.x64.exe",
+      "args": [
+        "/install",
+        "/passive",
+        "/norestart"
+      ],
+      "elevated": true
+    },
+    {
+      "id": "install-editor",
+      "label": "Kur",
+      "icon": "install",
+      "kind": "install",
+      "target": "Setup/Editor/LevelEditor.msi",
+      "elevated": true,
+      "confirm": "Bu paket imzalı değil. Devam edilsin mi?"
+    },
+    {
+      "id": "open-manual",
+      "label": "Aç",
+      "icon": "document",
+      "kind": "open",
+      "target": "Belgeler/kilavuz.pdf"
+    },
+    {
+      "id": "visit-site",
+      "label": "Web Sitesi",
+      "icon": "web",
+      "kind": "url",
+      "target": "https://example.com"
+    }
+  ],
+  "credits": [
+    {
+      "text": "Disc Studio ile hazırlandı"
+    }
+  ],
+  "licenses": [
+    {
+      "name": "LibVLC",
+      "license": "LGPL-2.1-or-later",
+      "file": ".disc/licenses/libvlc.txt"
+    }
+  ]
+}

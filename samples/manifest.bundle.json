@@ -1,0 +1,141 @@
+{
+  "$schema": "../schemas/manifest.schema.json",
+  "version": 1,
+  "disc": {
+    "label": "OYUNUMUZ_SETUP",
+    "title": "Oyunumuz — Kurulum Diski",
+    "media": "dvd5",
+    "createdAt": "2026-10-17T12:00:00Z",
+    "builder": "DiscStudio 0.1.0",
+    "locale": "tr-TR",
+    "icon": ".disc/icon.ico",
+    "home": {
+      "view": "bundle"
+    }
+  },
+  "theme": {
+    "package": "ds.standard.mixed",
+    "version": "1.0.0",
+    "palette": {
+      "bg": "#0b0d14",
+      "surface": "#161a26",
+      "accent": "#ffcf6b",
+      "accentText": "#1c0f02",
+      "text": "#f2f1ee",
+      "muted": "#9aa0b1"
+    }
+  },
+  "sections": [
+    {
+      "id": "sec-apps",
+      "kind": "app",
+      "title": "Programlar",
+      "items": [
+        "ap-vc",
+        "ap-game",
+        "ap-editor",
+        "ap-sound"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "ap-vc",
+      "type": "app",
+      "title": "Visual C++ Çalışma Zamanı",
+      "category": "runtime",
+      "version": "14.40",
+      "icon": "Setup/ap-vc/icon.png",
+      "bundle": {
+        "required": true,
+        "order": 0,
+        "silentArgs": [
+          "/install",
+          "/quiet",
+          "/norestart"
+        ]
+      },
+      "actions": [
+        "inst-vc"
+      ]
+    },
+    {
+      "id": "ap-game",
+      "type": "app",
+      "title": "Oyunumuz",
+      "category": "game",
+      "version": "1.4.2",
+      "icon": "Setup/ap-game/icon.png",
+      "bundle": {
+        "selected": true,
+        "order": 1,
+        "silentArgs": [
+          "/VERYSILENT"
+        ]
+      },
+      "actions": [
+        "inst-game"
+      ]
+    },
+    {
+      "id": "ap-editor",
+      "type": "app",
+      "title": "Seviye Editörü",
+      "category": "tool",
+      "version": "0.9.0",
+      "icon": "Setup/ap-editor/icon.png",
+      "bundle": {
+        "selected": true,
+        "order": 2
+      },
+      "actions": [
+        "inst-editor"
+      ]
+    },
+    {
+      "id": "ap-sound",
+      "type": "app",
+      "title": "Ses Paketi",
+      "category": "dlc",
+      "version": "1.0",
+      "icon": "Setup/ap-sound/icon.png",
+      "bundle": {
+        "selected": false,
+        "order": 3
+      },
+      "actions": [
+        "inst-sound"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "inst-vc",
+      "label": "Kur",
+      "kind": "install",
+      "target": "Setup/Prereq/vc_redist.x64.exe",
+      "elevated": true
+    },
+    {
+      "id": "inst-game",
+      "label": "Kur",
+      "kind": "install",
+      "target": "Setup/Game/setup.exe",
+      "elevated": true
+    },
+    {
+      "id": "inst-editor",
+      "label": "Kur",
+      "kind": "install",
+      "target": "Setup/Editor/LevelEditor.msi",
+      "elevated": true
+    },
+    {
+      "id": "inst-sound",
+      "label": "Kur",
+      "kind": "install",
+      "target": "Setup/SoundPack/setup.exe",
+      "elevated": true
+    }
+  ]
+}

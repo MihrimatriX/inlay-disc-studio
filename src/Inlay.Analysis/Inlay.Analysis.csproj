@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inlay.Core\Inlay.Core.csproj" />
+    <ProjectReference Include="..\Inlay.Media\Inlay.Media.csproj" />
+    <ProjectReference Include="..\Inlay.Theming\Inlay.Theming.csproj" />
+    <ProjectReference Include="..\Inlay.Imaging\Inlay.Imaging.csproj" />
+    <EmbeddedResource Include="..\..\ui\disc-sdk\dist\disc-sdk.js" LogicalName="disc-sdk.js" />
+    <PackageReference Include="MetadataExtractor" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+    <PackageReference Include="TagLibSharp" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,12 @@
+{%- comment -%} Credits and licenses live behind "Hakkında" (§7.2.4); TMDB/IGDB attribution is a manifest credit. {%- endcomment -%}
+<div class="sheet about" id="s-about" role="dialog" aria-label="{{ 'ui.about' | t }}" style="position:fixed;z-index:25">
+  <h2>{{ disc.title }}</h2>
+  {%- if credits -%}
+  <h2 style="font-size:1rem;color:var(--ink-3);margin-top:1rem">{{ 'ui.credits' | t }}</h2>
+  {%- for c in credits -%}<p>{{ c.text }}</p>{%- endfor -%}
+  {%- endif -%}
+  <h2 style="font-size:1rem;color:var(--ink-3);margin-top:1rem">{{ 'ui.licenses' | t }}</h2>
+  {%- for l in licenses -%}<p>{{ l.name }} — {{ l.license }}</p>{%- endfor -%}
+  <p>Outfit — SIL Open Font License 1.1</p>
+  <p>{{ disc.builder }}</p>
+</div>

@@ -1,0 +1,41 @@
+/* The window behind is blurred 6 px and dimmed 55 % (§2.4 Diyalog); the native title bar dims with it. */
+.backdrop { position: fixed; inset: 0; z-index: 30; background: rgba(8, 8, 10, 0.55); backdrop-filter: blur(6px); display: grid; place-items: center; }
+.light { position: absolute; left: 50%; top: 50%; width: 760px; height: 760px; translate: -50% -50%; border-radius: 50%; background: radial-gradient(circle, rgba(var(--accent-rgb), 0.16), transparent 60%); pointer-events: none; }
+.dialog {
+  position: relative;
+  width: 580px;
+  padding: 30px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(34, 35, 41, 0.92), rgba(24, 25, 29, 0.92));
+  backdrop-filter: blur(30px);
+  box-shadow: var(--shadow-dialog), inset 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.head { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 22px; align-items: center; }
+.disc { position: relative; width: 104px; height: 104px; border-radius: 50%; overflow: hidden; animation: spin 2.6s linear infinite; box-shadow: 0 14px 28px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.14); background: conic-gradient(from 210deg, #c9d3ff, #f4c7e4, #ffdcb4, #fff1d6, #c6efe0, #b9c6f5, #e7c3ef, #c9d3ff); }
+.discStill { composes: disc; animation: none; }
+.disc img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hub { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, #1c1d22 0 8%, rgba(255, 255, 255, 0.8) 8.5% 10%, #c9ccd2 10.5% 17%, transparent 17.5%), linear-gradient(135deg, rgba(255, 255, 255, 0.35), transparent 45%); }
+.ok { width: 104px; height: 104px; border-radius: 50%; display: grid; place-items: center; color: var(--ok); background: rgba(74, 222, 128, 0.1); box-shadow: inset 0 0 0 1px rgba(74, 222, 128, 0.3); }
+.h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+.sub { color: var(--muted); }
+.progress { display: flex; flex-direction: column; gap: 10px; }
+.numbers { display: flex; justify-content: space-between; align-items: baseline; }
+.pct { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+.left { color: var(--muted); }
+.track { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.07); }
+.fill { height: 100%; border-radius: 999px; background: var(--accent-grad); box-shadow: 0 0 16px -2px var(--accent); transition: width 0.4s; }
+.bytes { color: var(--faint); font-size: 13.5px; }
+.text { margin: 0; color: var(--text-2); }
+.text p { margin: 0 0 6px; }
+.details { color: var(--faint); font-size: 13px; font-family: var(--mono); user-select: text; }
+.buttons { display: flex; justify-content: flex-end; gap: 10px; }
+.buttons button { height: 42px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.check { display: flex; align-items: center; gap: 10px; color: var(--text-2); min-height: 40px; }
+.report { display: flex; flex-direction: column; gap: 10px; }
+.badList { margin: 0; padding-left: 18px; color: var(--text-2); font-size: 13.5px; font-family: var(--mono); }
+.graph { margin: 0; display: flex; align-items: flex-end; gap: 12px; }
+.graph figcaption { color: var(--muted); font-size: 13px; }

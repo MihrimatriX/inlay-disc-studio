@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>Inlay</AssemblyName>
+    <RootNamespace>Inlay.Builder</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Inlay.ico</ApplicationIcon>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inlay.Analysis\Inlay.Analysis.csproj" />
+    <ProjectReference Include="..\Inlay.Burn\Inlay.Burn.csproj" />
+    <PackageReference Include="Microsoft.Web.WebView2" />
+    <Using Include="System.IO" />
+    <Using Include="System.Net.Http" />
+    <Resource Include="Fonts\*.ttf" />
+    <Resource Include="Inlay.ico" />
+    <!-- The React UI (npm run build:builder), the standard templates and the licences travel next to Inlay.exe. -->
+    <None Include="..\..\ui\builder\dist\**\*" LinkBase="ui" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\themes\**\*" LinkBase="themes" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Fonts\OFL.txt" Link="licenses\Geist-OFL.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

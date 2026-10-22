@@ -1,0 +1,15 @@
+{%- comment -%} Document: plain page preview, title, size, Aç + Klasörde göster (§7.2). {%- endcomment -%}
+<section class="view document" id="v-{{ item.id }}" data-kind="file" data-label="{{ item.title }}" hidden>
+  {%- include 'partials/top' -%}
+  <div class="page">{% if item.cover %}<img src="{{ item.cover | relurl }}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">{% else %}<svg><use href="#i-doc"/></svg>{% endif %}</div>
+  <section class="hero">
+    <span class="meta">{{ 'ui.document' | t }}{% if item.sizeBytes %} · {{ item.sizeBytes | filesize }}{% endif %}</span>
+    <h1 class="title long">{{ item.title }}</h1>
+    {%- if item.description -%}<p class="summary">{{ item.description }}</p>{%- endif -%}
+    <div class="actions">
+      {%- for id in item.actions -%}
+      <button class="btn{% if forloop.first %} primary{% endif %}" data-action="{{ id }}">{% if forloop.first %}<svg><use href="#i-doc"/></svg>{% endif %}<span>{{ actions[id].label }}</span></button>
+      {%- endfor -%}
+    </div>
+  </section>
+</section>

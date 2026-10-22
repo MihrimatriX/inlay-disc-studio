@@ -1,0 +1,4 @@
+.stage { position: relative; min-height: 0; min-width: 0; border-radius: var(--r-panel); overflow: hidden; background: #0b0b0d; box-shadow: var(--surface-line); display: grid; place-items: center; }
+.glow { position: absolute; inset: -60px; width: calc(100% + 120px); height: calc(100% + 120px); object-fit: cover; filter: blur(60px); opacity: 0.35; pointer-events: none; }
+.frame { position: relative; margin: 0; border-radius: 12px; overflow: hidden; background: #0c0d0f; box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.1); }
+.iframe { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; border: 0; transform-origin: 0 0; background: #0c0d0f; }
