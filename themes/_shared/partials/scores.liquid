@@ -1,0 +1,8 @@
+{%- comment -%} The item's outside scores in a details sheet: IMDb · Rotten Tomatoes · Metacritic (OMDb, Steam). {%- endcomment -%}
+{%- if item.ratings.imdb or item.ratings.rottenTomatoes or item.ratings.metacritic -%}
+<p class="scores">
+  {%- if item.ratings.imdb -%}<span>IMDb <b>{{ item.ratings.imdb }}</b></span>{%- endif -%}
+  {%- if item.ratings.rottenTomatoes -%}<span>Rotten Tomatoes <b>{{ 'ui.percent' | t: item.ratings.rottenTomatoes }}</b></span>{%- endif -%}
+  {%- if item.ratings.metacritic -%}<span>Metacritic <b>{{ item.ratings.metacritic }}</b></span>{%- endif -%}
+</p>
+{%- endif -%}

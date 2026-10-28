@@ -1,0 +1,12 @@
+.card { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: 14px; background: rgba(255, 255, 255, 0.03); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
+.question { font-weight: 600; }
+.options { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.option { display: flex; align-items: center; gap: 12px; padding: 8px 14px 8px 8px; min-height: 40px; border: 0; border-radius: 12px; background: var(--control); box-shadow: var(--control-line); color: var(--text); text-align: left; }
+.option:hover { background: rgba(255, 255, 255, 0.09); }
+.poster { width: 32px; height: 48px; flex: none; object-fit: cover; border-radius: 5px; background: rgba(255, 255, 255, 0.06); }
+.text { display: flex; flex-direction: column; font-size: 14px; }
+.text span { color: var(--muted); font-size: 13px; }
+.self { border: 0; background: none; color: var(--accent-pill); padding: 0 8px; min-height: 40px; }
+.form { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.form > label:first-child { flex: 1; min-width: 220px; }
+.year { width: 110px; }

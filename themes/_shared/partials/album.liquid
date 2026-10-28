@@ -1,0 +1,29 @@
+{%- comment -%} "Albüm" (design/screens/t2-muzik, §4.3). {%- endcomment -%}
+<section class="view album" id="v-{{ item.id }}" data-kind="album" data-label="{{ item.title }}" data-cover="{% if item.cover %}{{ item.cover | relurl }}{% endif %}" hidden>
+  {%- if item.cover -%}<img class="blur" src="{{ item.cover | relurl }}" alt="">{%- endif -%}
+  <div class="veil" aria-hidden="true"></div>
+  {%- include 'partials/top' -%}
+  <div class="layout">
+    {%- if item.cover -%}<img class="cover" src="{{ item.cover | relurl }}" alt="{{ item.title }}">{%- else -%}<div class="cover"></div>{%- endif -%}
+    <section>
+      <h1>{{ item.title }}</h1>
+      <span class="by">{{ item.artist }}{% if item.artist and item.year %} · {% endif %}{{ item.year }}</span>
+      <div class="actions">
+        {%- for id in item.actions -%}{%- if forloop.first -%}
+        <button class="btn primary" data-action="{{ id }}"><svg><use href="#i-play"/></svg><span>{{ 'ui.play' | t }}</span></button>
+        {%- endif -%}{%- endfor -%}
+        <button class="btn" data-shuffle="{{ item.id }}">{{ 'ui.shuffle' | t }}</button>
+      </div>
+      <ol class="tracks">
+        {%- for tr in item.tracks -%}
+        <li><button class="track" data-track="{{ tr.id }}" data-album="{{ item.id }}">
+          <span class="no">{{ tr.no }}</span>
+          <span>{{ tr.title }}{% if tr.artist %}<small>{{ tr.artist }}</small>{% endif %}</span>
+          <span>{% if tr.lyrics %}<span class="lyr">{{ 'ui.lyrics' | t }}</span>{% endif %}</span>
+          <span class="len">{{ tr.media.durationSec | clock }}</span>
+        </button></li>
+        {%- endfor -%}
+      </ol>
+    </section>
+  </div>
+</section>

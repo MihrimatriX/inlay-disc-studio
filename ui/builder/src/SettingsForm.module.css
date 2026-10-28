@@ -1,0 +1,9 @@
+.form { display: flex; flex-direction: column; gap: 22px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.06); }
+.group { display: flex; flex-direction: column; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.name { color: var(--text-2); font-size: 14px; display: flex; justify-content: space-between; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--text); }
+.color { display: flex; align-items: center; gap: 12px; }
+.color .row { justify-content: flex-start; gap: 8px; color: var(--text-2); font-size: 14px; }
+.swatch { width: 40px; height: 32px; padding: 0; border: 0; border-radius: 8px; background: none; }
+.range { accent-color: var(--accent); width: 100%; }

@@ -1,0 +1,49 @@
+{%- comment -%}
+  Every view is rendered once; assets/ds.js shows one at a time (hash routing, View Transitions, focus navigation).
+  Views: v-menu, v-collection, v-bundle and one v-<item id> per item. Open one directly with #<item id> (§7.2.6).
+{%- endcomment -%}
+{%- include 'partials/icons' -%}
+<main id="views" data-home="{{ disc.home.view }}" data-home-item="{{ disc.home.item }}" data-home-kind="{{ disc.home.kind }}">
+  {%- if disc.home.view == 'menu' -%}{%- include 'partials/menu' -%}{%- endif -%}
+  {%- if disc.home.view == 'collection' -%}{%- include 'partials/collection' -%}{%- endif -%}
+  {%- if disc.home.view == 'bundle' -%}{%- include 'partials/bundle' -%}{%- endif -%}
+  {%- for item in all_items -%}
+    {%- case item.type -%}
+      {%- when 'movie' -%}{%- include 'partials/movie' -%}
+      {%- when 'series' -%}{%- include 'partials/series' -%}
+      {%- when 'album' -%}{%- include 'partials/album' -%}
+      {%- when 'gallery' -%}{%- include 'partials/gallery' -%}
+      {%- when 'app' -%}{%- unless item.category == 'runtime' -%}{%- include 'partials/app' -%}{%- endunless -%}
+      {%- when 'file' -%}{%- include 'partials/file' -%}
+    {%- endcase -%}
+  {%- endfor -%}
+</main>
+{%- include 'partials/about' -%}
+<div class="playerbar" id="playerbar" role="region" aria-label="{{ 'ui.nowPlaying' | t }}">
+  <img id="pb-cover" alt="">
+  <div><b id="pb-title"></b><small id="pb-sub"></small><div class="seek"><i id="pb-seek"></i></div></div>
+  <div class="ctl">
+    <button class="icon-btn" id="pb-prev" aria-label="{{ 'ui.prev' | t }}"><svg><use href="#i-prev"/></svg></button>
+    <button class="icon-btn main" id="pb-toggle" aria-label="{{ 'ui.pause' | t }}"><svg><use href="#i-pause"/></svg></button>
+    <button class="icon-btn" id="pb-next" aria-label="{{ 'ui.next' | t }}"><svg><use href="#i-next"/></svg></button>
+    <button class="icon-btn" id="pb-stop" aria-label="{{ 'ui.stopPlayer' | t }}"><svg><use href="#i-close"/></svg></button>
+  </div>
+</div>
+<dialog class="viewer" id="viewer" aria-label="{{ 'ui.photos' | t: '' }}">
+  <div class="frame" id="viewer-frame"></div>
+  <span class="caption" id="viewer-caption"></span>
+  <div class="nav">
+    <button class="icon-btn" id="viewer-prev" aria-label="{{ 'ui.prevPhoto' | t }}"><svg><use href="#i-left"/></svg></button>
+    <button class="icon-btn" id="viewer-next" aria-label="{{ 'ui.nextPhoto' | t }}"><svg><use href="#i-right"/></svg></button>
+    <button class="icon-btn" id="viewer-close" aria-label="{{ 'ui.close' | t }}"><svg><use href="#i-close"/></svg></button>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+{%- if disc.intro.video -%}
+<div class="intro" id="intro" data-ms="{{ disc.intro.durationMs | default: 2500 }}">
+  <video src="{{ disc.intro.video | relurl }}" muted autoplay playsinline></video>
+  {%- unless disc.intro.skippable == false -%}<button class="btn skip" id="intro-skip">{{ 'ui.skip' | t }}</button>{%- endunless -%}
+</div>
+{%- endif -%}
+{%- unless hosted -%}<p class="browser-note">{{ 'ui.browserMode' | t }}</p>{%- endunless -%}
+<script type="application/json" id="ds-data">{"text":{{ text | json }},"hosted":{{ hosted | json }},"title":{{ disc.title | json }}}</script>

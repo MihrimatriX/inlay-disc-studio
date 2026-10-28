@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Inlay.Analysis/Inlay.Analysis.csproj" />
+    <Project Path="src/Inlay.Builder/Inlay.Builder.csproj" />
+    <Project Path="src/Inlay.Burn/Inlay.Burn.csproj" />
+    <Project Path="src/Inlay.Core/Inlay.Core.csproj" />
+    <Project Path="src/Inlay.Imaging/Inlay.Imaging.csproj" />
+    <Project Path="src/Inlay.Launcher.Player/Inlay.Launcher.Player.csproj" />
+    <Project Path="src/Inlay.Launcher/Inlay.Launcher.csproj" />
+    <Project Path="src/Inlay.Media/Inlay.Media.csproj" />
+    <Project Path="src/Inlay.Setup/Inlay.Setup.csproj" />
+    <Project Path="src/Inlay.Theming/Inlay.Theming.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Inlay.Analysis.Tests/Inlay.Analysis.Tests.csproj" />
+    <Project Path="tests/Inlay.Builder.Tests/Inlay.Builder.Tests.csproj" />
+    <Project Path="tests/Inlay.Burn.Tests/Inlay.Burn.Tests.csproj" />
+    <Project Path="tests/Inlay.Core.Tests/Inlay.Core.Tests.csproj" />
+    <Project Path="tests/Inlay.Launcher.Player.Tests/Inlay.Launcher.Player.Tests.csproj" />
+    <Project Path="tests/Inlay.Launcher.Tests/Inlay.Launcher.Tests.csproj" />
+    <Project Path="tests/Inlay.Media.Tests/Inlay.Media.Tests.csproj" />
+    <Project Path="tests/Inlay.Theming.Tests/Inlay.Theming.Tests.csproj" />
+  </Folder>
+</Solution>

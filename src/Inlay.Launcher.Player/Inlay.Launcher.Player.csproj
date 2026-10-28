@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <IsAotCompatible>true</IsAotCompatible>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="LibVLCSharp" />
+    <!-- Binaries only: the builder copies a pruned subset onto the disc (.disc/player); nothing is copied here. -->
+    <PackageReference Include="VideoLAN.LibVLC.Windows" ExcludeAssets="all" />
+  </ItemGroup>
+</Project>

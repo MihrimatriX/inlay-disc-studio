@@ -1,0 +1,11 @@
+bin/
+obj/
+node_modules/
+*.user
+.vs/
+tools/
+ui/disc-sdk/dist/
+ui/builder/dist/
+artifacts/
+TestResults/
+.claude/worktrees/

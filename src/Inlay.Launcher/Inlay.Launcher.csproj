@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>Baslat</AssemblyName>
+    <RootNamespace>Inlay.Launcher</RootNamespace>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon>inlay.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- §9.1: NativeAOT, single exe ≤ 10 MB, Turkish collation needs real globalization. -->
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <IlcOptimizationPreference>Size</IlcOptimizationPreference>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <StackTraceSupport>false</StackTraceSupport>
+    <IsAotCompatible>true</IsAotCompatible>
+    <SatelliteResourceLanguages>tr;en</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inlay.Core\Inlay.Core.csproj" />
+    <ProjectReference Include="..\Inlay.Launcher.Player\Inlay.Launcher.Player.csproj" />
+    <!-- Only the loader is taken from the SDK package: static lib for AOT, DLL for JIT runs (tests, F5). -->
+    <PackageReference Include="JsonSchema.Net" />
+    <PackageReference Include="Microsoft.Web.WebView2" ExcludeAssets="all" GeneratePathProperty="true" />
+    <EmbeddedResource Include="..\..\ui\disc-sdk\dist\disc-sdk.js" LogicalName="disc-sdk.js" />
+    <EmbeddedResource Include="..\..\schemas\manifest.schema.json" LogicalName="manifest.schema.json" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(PublishAot)' == 'true'">
+    <DirectPInvoke Include="WebView2Loader" />
+    <NativeLibrary Include="$(PkgMicrosoft_Web_WebView2)\build\native\x64\WebView2LoaderStatic.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(PkgMicrosoft_Web_WebView2)\runtimes\win-x64\native\WebView2Loader.dll" Link="WebView2Loader.dll"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" Visible="false" />
+  </ItemGroup>
+  <!-- The page SDK is TypeScript; rebuild it when its sources change so the embedded copy is never stale. -->
+  <Target Name="BuildDiscSdk" BeforeTargets="BeforeBuild"
+          Inputs="@(DiscSdkSource)" Outputs="..\..\ui\disc-sdk\dist\disc-sdk.js">
+    <Exec Command="npm run build:sdk" WorkingDirectory="..\.." />
+  </Target>
+  <ItemGroup>
+    <DiscSdkSource Include="..\..\ui\disc-sdk\src\**\*.ts" />
+  </ItemGroup>
+</Project>

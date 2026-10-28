@@ -1,0 +1,27 @@
+{%- comment -%}
+  Mixed disc main menu (§4.6, prototype behaviour): Sinema stage, featured item bottom-left, one row of covers grouped
+  by kind. Enter opens the item's page.
+{%- endcomment -%}
+{%- assign featured = items[disc.featured] | default: all_items.first -%}
+{%- assign fbg = featured.backdrop | default: featured.cover -%}
+<section class="view movie menu" id="v-menu" data-kind="menu" data-label="{{ 'ui.home' | t }}" hidden>
+  <img class="stage-img" data-bg-a {% if fbg %}src="{{ fbg | relurl }}"{% endif %} alt="">
+  <img class="stage-img fade" data-bg-b alt="">
+  <div class="shade" aria-hidden="true"></div>
+  <p class="brand">{{ disc.title }}</p>
+  <div class="corner"><button class="ghost" data-sheet="s-about">{{ 'ui.about' | t }}</button></div>
+  <section class="hero">
+    <span class="meta" data-hero-meta></span>
+    <h1 class="title" data-hero-title>{{ featured.title }}</h1>
+    <p class="summary" data-hero-summary></p>
+  </section>
+  <div class="rows">
+    <div class="row">
+      {%- for section in sections -%}{%- unless section.hidden -%}
+        {%- for item in section.entries -%}
+          {%- unless item.category == 'runtime' -%}{%- include 'partials/card' -%}{%- endunless -%}
+        {%- endfor -%}
+      {%- endunless -%}{%- endfor -%}
+    </div>
+  </div>
+</section>

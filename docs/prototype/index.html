@@ -1,0 +1,833 @@
+<title>Disc Studio Menü</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..600&display=swap">
+<style>
+/* Layout: diskin içeriğine göre açılış görünümü seçilir.
+   Karışık → ana menü (sahne + türlere göre gruplu sıra). Tek öğe → doğrudan o türün sayfası.
+   Çok film / çok albüm → koleksiyon ızgarası. Bölümlü film → dizi sayfası. Çok kurulum → program paketi listesi. */
+@property --accent { syntax:'<color>'; inherits:true; initial-value:#ffb24a; }
+@property --glow   { syntax:'<color>'; inherits:true; initial-value:#ff6b3d; }
+:root{
+  color-scheme:dark;
+  --bg:#0a0c14; --panel:#131622; --raise:rgba(255,255,255,.06); --line:rgba(220,226,255,.10);
+  --text:#f1f2f7; --muted:#a3a9bf; --faint:#6d7389; --ok:#5fd59b; --warn:#ffc857;
+  --accent:#ffb24a; --glow:#ff6b3d; --on-accent:#1a0c02;
+  --f-display:"Bricolage Grotesque","Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
+  --f-body:"Instrument Sans","Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --th:clamp(150px, 19vh, 210px);
+  transition:--accent .6s ease, --glow .6s ease;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%; background:var(--bg); color:var(--text)}
+body{font-family:var(--f-body); font-size:16px; line-height:1.5; overflow-x:hidden; display:flex; flex-direction:column}
+button{font:inherit; color:inherit; background:none; border:0; cursor:pointer; padding:0}
+:focus-visible{outline:2px solid var(--accent); outline-offset:4px}
+h1,h2,h3{font-family:var(--f-display); text-wrap:balance}
+.gut{padding-left:max(clamp(16px,5vw,64px), env(safe-area-inset-left,0px)); padding-right:max(clamp(16px,5vw,64px), env(safe-area-inset-right,0px))}
+#root{flex:1; position:relative; isolation:isolate; overflow-x:clip; min-width:0}
+#root > *{min-width:0}
+body.playing #root{padding-bottom:84px}
+.glow{position:absolute; inset:0; z-index:-2; pointer-events:none; background:radial-gradient(70% 55% at 75% 20%, color-mix(in oklab, var(--glow) 26%, transparent), transparent 70%)}
+
+/* prototip şeridi (gerçek diskte yok) */
+.demo{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding-block:8px; background:#05060b; border-bottom:1px solid var(--line); font-size:13px; color:var(--faint)}
+.demo b{color:var(--muted); font-weight:600}
+.demo select{font:inherit; color:var(--text); background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:5px 8px; max-width:100%}
+
+/* ortak */
+.kind{font-size:13px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--accent)}
+.meta{color:var(--muted); font-size:15px}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; height:50px; padding:0 24px; border-radius:999px; font-weight:600; font-size:16px;
+  background:rgba(255,255,255,.10); border:1px solid var(--line); transition:transform .15s, background .2s, filter .2s; white-space:nowrap}
+.btn:hover{background:rgba(255,255,255,.16)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent); color:var(--on-accent); border-color:transparent; padding:0 30px}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.5; cursor:default}
+.btn svg{width:20px; height:20px; flex:none}
+.buttons{display:flex; flex-wrap:wrap; gap:12px}
+.topnav{display:flex; align-items:center; gap:14px; padding-block:20px 0; position:relative; z-index:2}
+.back{flex:none; white-space:nowrap; display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px 0 12px; border-radius:999px; background:rgba(10,12,20,.5); border:1px solid var(--line); backdrop-filter:blur(10px); font-weight:600; font-size:14px}
+.back:hover{background:rgba(255,255,255,.12)}
+.back svg{width:18px; height:18px}
+.brand{display:flex; align-items:center; gap:12px; min-width:0}
+.brand .dot{width:26px; height:26px; border-radius:50%; flex:none; background:radial-gradient(circle, var(--bg) 0 18%, transparent 19%), conic-gradient(from 40deg, var(--accent), var(--glow), var(--accent))}
+.brand b{font-weight:600; font-size:15px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.topnav .dt{color:var(--faint); font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.sec{display:grid; gap:14px; padding-block:18px}
+.sec h2{margin:0; font-size:21px; font-weight:700; letter-spacing:-.015em}
+.hrow{display:flex; gap:16px; overflow-x:auto; padding:4px 2px 10px; scrollbar-width:thin}
+
+/* ===== ANA MENÜ (karışık) ===== */
+.home{display:grid; grid-template-rows:auto 1fr auto auto; min-height:100%}
+.backdrop{position:absolute; inset:0 0 auto 32%; height:74%; z-index:-1; overflow:hidden;
+  -webkit-mask:linear-gradient(to left, #000 35%, transparent 95%), linear-gradient(to top, transparent 20%, #000 62%); -webkit-mask-composite:source-in;
+  mask:linear-gradient(to left, #000 35%, transparent 95%) intersect, linear-gradient(to top, transparent 20%, #000 62%)}
+.backdrop > div{position:absolute; inset:-6%}
+.home-head{padding-block:22px 0}
+.stage{display:flex; align-items:flex-end; padding-block:32px 26px; min-height:300px}
+.info{max-width:560px; display:grid; gap:12px}
+.info h1{margin:0; font-weight:800; font-size:clamp(38px,6vw,80px); line-height:.95; letter-spacing:-.035em}
+.desc{margin:0; color:color-mix(in oklab, var(--text) 80%, var(--muted)); font-size:17px; max-width:46ch; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.info .buttons{margin-top:8px}
+.shelf{padding-block:4px 16px}
+.groups{display:flex; gap:34px; overflow-x:auto; padding:6px 12px 12px; margin:0 -12px; scrollbar-width:none; align-items:flex-end}
+.groups::-webkit-scrollbar{display:none}
+.group{display:grid; gap:10px; flex:none}
+.glabel{display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--faint)}
+.glabel svg{width:15px; height:15px}
+.gtiles{display:flex; gap:16px; align-items:flex-end}
+.tile{flex:none; display:grid; gap:10px; text-align:left; border-radius:12px}
+.tile .art{height:var(--th); position:relative; opacity:.6; transition:transform .25s cubic-bezier(.2,.8,.2,1), opacity .25s}
+.tile:hover .art{opacity:.85}
+.tile[aria-current="true"] .art{opacity:1; transform:translateY(-6px)}
+.tile .face{position:absolute; inset:0; border-radius:12px; overflow:hidden; box-shadow:0 0 0 1px var(--line)}
+.tile[aria-current="true"] .face{box-shadow:0 0 0 3px var(--accent), 0 18px 40px -14px var(--glow)}
+.tile:focus-visible{outline:none}
+.tile:focus-visible .face{box-shadow:0 0 0 3px var(--text)}
+.tile .lbl{font-size:14px; font-weight:600; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
+.tile[aria-current="true"] .lbl{color:var(--text)}
+.t-movie .art{aspect-ratio:2/3}
+.t-album .art{aspect-ratio:1.22/1}
+.t-album .face{right:auto; width:82%; z-index:1}
+.t-album .vinyl{position:absolute; top:6%; bottom:6%; right:0; aspect-ratio:1; border-radius:50%; transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+.tile.t-album[aria-current="true"] .vinyl{transform:translateX(8%) rotate(40deg)}
+.t-gallery .art{aspect-ratio:1/1}
+.t-gallery .face{overflow:visible; box-shadow:none}
+.t-gallery .ph{position:absolute; border-radius:4px; box-shadow:0 8px 20px rgba(0,0,0,.45)}
+.tile.t-gallery[aria-current="true"] .face{box-shadow:none}
+.tile.t-gallery[aria-current="true"] .ph:last-child{box-shadow:0 0 0 3px var(--accent), 0 18px 40px -14px var(--glow)}
+.t-app .art{aspect-ratio:16/10}
+.t-doc .art{aspect-ratio:3/4}
+.hints{display:flex; gap:22px; padding-block:0 18px; color:var(--faint); font-size:13px}
+.hints kbd{font:inherit; font-size:12px; padding:2px 7px; border:1px solid var(--line); border-radius:6px; color:var(--muted); margin-right:6px}
+@media (hover:none){ .hints{display:none} }
+
+/* ===== KOLEKSİYON (çok film / çok albüm) ===== */
+.coll-head{display:flex; flex-wrap:wrap; gap:20px; align-items:flex-end; justify-content:space-between; padding-block:36px 8px}
+.coll-head h1{margin:6px 0 4px; font-size:clamp(36px,5.5vw,68px); font-weight:800; letter-spacing:-.035em; line-height:.98}
+.cgrid{display:grid; grid-template-columns:repeat(auto-fill, minmax(min(180px, 42vw), 1fr)); gap:28px 22px; padding-block:22px 64px}
+.cgrid.sq{grid-template-columns:repeat(auto-fill, minmax(min(220px, 42vw), 1fr))}
+.ccard{display:grid; gap:10px; text-align:left; align-content:start}
+.ccard .cv{position:relative; border-radius:12px; overflow:hidden; aspect-ratio:2/3; box-shadow:0 0 0 1px var(--line); transition:transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s}
+.cgrid.sq .ccard .cv{aspect-ratio:1/1}
+.ccard:hover .cv,.ccard:focus-visible .cv{transform:translateY(-5px); box-shadow:0 0 0 3px var(--cc, var(--accent)), 0 20px 44px -16px var(--cc, var(--glow))}
+.ccard:focus-visible{outline:none}
+.ccard b{font-size:16px; line-height:1.25}
+.ccard span{color:var(--faint); font-size:13.5px}
+.ccard .prog{height:3px; border-radius:3px; background:rgba(255,255,255,.14); overflow:hidden; margin-top:-4px}
+.ccard .prog i{display:block; height:100%; background:var(--cc, var(--accent))}
+
+/* ===== FİLM SAYFASI ===== */
+.f-hero{position:absolute; inset:0 0 auto; height:clamp(360px, 68vh, 620px); z-index:-1; overflow:hidden;
+  -webkit-mask:linear-gradient(to top, transparent 0%, #000 55%); mask:linear-gradient(to top, transparent 0%, #000 55%)}
+.f-hero > div{position:absolute; inset:-10% -5%}
+.f-hero::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(10,12,20,.85), rgba(10,12,20,.15) 70%)}
+.f-head{display:grid; grid-template-columns:minmax(0,220px) minmax(0,1fr); gap:40px; align-items:end; padding-block:clamp(110px, 24vh, 240px) 10px}
+.poster{aspect-ratio:2/3; border-radius:14px; overflow:hidden; position:relative; box-shadow:0 30px 70px -20px rgba(0,0,0,.8), 0 0 0 1px var(--line)}
+.f-info{display:grid; gap:14px; max-width:640px}
+.f-info h1{margin:0; font-size:clamp(40px,6vw,76px); font-weight:800; line-height:.95; letter-spacing:-.035em}
+.f-info p{margin:0; color:color-mix(in oklab, var(--text) 82%, var(--muted)); font-size:17px; max-width:56ch}
+.tracksel{display:flex; flex-wrap:wrap; gap:18px; align-items:center; color:var(--muted); font-size:14px}
+.seg{display:inline-flex; padding:3px; border-radius:999px; background:var(--raise); border:1px solid var(--line)}
+.seg button{padding:5px 13px; border-radius:999px; font-size:13.5px; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--text); color:var(--bg); font-weight:600}
+.seg.lg{justify-self:start}
+.seg.lg button{padding:8px 18px; font-size:15px}
+.chap{flex:none; width:220px; display:grid; gap:8px; text-align:left}
+.chap .th{aspect-ratio:16/9; border-radius:10px; overflow:hidden; position:relative; box-shadow:0 0 0 1px var(--line); transition:transform .2s}
+.chap:hover .th{transform:translateY(-3px); box-shadow:0 0 0 2px var(--accent)}
+.tm{position:absolute; right:8px; bottom:8px; font-size:12px; font-weight:600; padding:2px 7px; border-radius:6px; background:rgba(0,0,0,.65); font-variant-numeric:tabular-nums}
+.chap b{font-size:14.5px}
+.person{flex:none; width:110px; display:grid; gap:8px; justify-items:center; text-align:center}
+.avatar{width:84px; height:84px; border-radius:50%; display:grid; place-items:center; font-family:var(--f-display); font-weight:700; font-size:24px; color:#fff}
+.person b{font-size:14px; line-height:1.25} .person span{font-size:12.5px; color:var(--faint); line-height:1.25}
+
+/* ===== DİZİ ===== */
+.eps{display:grid; gap:4px; padding-block:6px 64px}
+.ep{display:grid; grid-template-columns:minmax(0,220px) minmax(0,1fr) auto; gap:20px; align-items:center; padding:12px; border-radius:14px; text-align:left; width:100%}
+.ep:hover,.ep:focus-visible{background:var(--raise)}
+.ep .th{aspect-ratio:16/9; border-radius:10px; overflow:hidden; position:relative; box-shadow:0 0 0 1px var(--line)}
+.ep .th .pl{position:absolute; inset:0; display:grid; place-items:center; opacity:0; transition:opacity .2s; background:rgba(0,0,0,.35)}
+.ep .th .pl svg{width:36px; height:36px}
+.ep:hover .th .pl,.ep:focus-visible .th .pl{opacity:1}
+.ep .wbar{position:absolute; left:0; right:0; bottom:0; height:4px; background:rgba(255,255,255,.2)}
+.ep .wbar i{display:block; height:100%; background:var(--accent)}
+.ep b{font-size:17px; display:block; margin-bottom:4px}
+.ep p{margin:0; color:var(--muted); font-size:14.5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.ep .d{color:var(--faint); font-size:14px; font-variant-numeric:tabular-nums; white-space:nowrap}
+.ep .seen{color:var(--ok); font-size:13px; font-weight:600}
+
+/* ===== MÜZİK ===== */
+.m-wrap{display:grid; grid-template-columns:minmax(0,440px) minmax(0,1fr); gap:clamp(28px,5vw,72px); align-items:start; padding-block:32px 64px}
+.record{position:relative; aspect-ratio:1.3/1; max-width:100%}
+.record .cover{position:absolute; inset:0 auto 0 0; width:77%; border-radius:12px; overflow:hidden; z-index:1; box-shadow:0 30px 60px -20px rgba(0,0,0,.8), 0 0 0 1px var(--line)}
+.record .vinyl{position:absolute; top:4%; bottom:4%; right:0; aspect-ratio:1; border-radius:50%}
+.record.spin .vinyl{animation:spin 3.2s linear infinite}
+@keyframes spin{to{rotate:360deg}}
+.m-info{display:grid; gap:12px}
+.m-info h1{margin:0; font-size:clamp(34px,4.6vw,60px); font-weight:800; line-height:.98; letter-spacing:-.03em}
+.m-info .artist{font-size:19px; font-weight:600}
+.tracks{display:grid; margin-top:18px; border-top:1px solid var(--line)}
+.trk{display:grid; grid-template-columns:36px minmax(0,1fr) auto; gap:14px; align-items:center; padding:14px 10px; border-bottom:1px solid var(--line); text-align:left; width:100%}
+.trk:hover{background:var(--raise)}
+.trk .n{color:var(--faint); font-variant-numeric:tabular-nums; display:grid; place-items:center}
+.trk .d{color:var(--muted); font-variant-numeric:tabular-nums; font-size:14px}
+.trk.now .t{color:var(--accent); font-weight:600}
+.eq{display:inline-flex; gap:2px; align-items:flex-end; height:14px}
+.eq i{width:3px; background:var(--accent); animation:eq 1s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:-.4s} .eq i:nth-child(3){animation-delay:-.7s}
+.eq.paused i{animation-play-state:paused}
+@keyframes eq{0%,100%{height:30%} 50%{height:100%}}
+.ccard .vin{position:absolute; top:8%; bottom:8%; right:0; aspect-ratio:1; border-radius:50%; transition:right .35s cubic-bezier(.2,.8,.2,1)}
+.cgrid.sq .ccard .cv{overflow:visible}
+.cgrid.sq .ccard .cvi{position:absolute; inset:0; border-radius:12px; overflow:hidden; z-index:1}
+.ccard:hover .vin,.ccard:focus-visible .vin{right:-16%}
+
+/* ===== FOTOĞRAF ===== */
+.g-head{display:flex; flex-wrap:wrap; gap:20px; align-items:flex-end; justify-content:space-between; padding-block:28px 6px}
+.g-head h1{margin:6px 0 4px; font-size:clamp(34px,5vw,62px); font-weight:800; letter-spacing:-.03em; line-height:1}
+.month h3{margin:24px 0 12px; font-size:18px; font-weight:700; color:var(--muted)}
+.pgrid{display:grid; grid-template-columns:repeat(auto-fill, minmax(min(190px, 40vw), 1fr)); grid-auto-rows:clamp(120px, 14vw, 180px); grid-auto-flow:row dense; gap:8px}
+.pgrid button{position:relative; border-radius:8px; overflow:hidden; transition:filter .2s}
+.pgrid button:hover{filter:brightness(1.12)}
+.pgrid .wide{grid-column:span 2}
+.vbadge{position:absolute; left:8px; bottom:8px; display:flex; align-items:center; gap:5px; font-size:12px; font-weight:600; padding:3px 8px; border-radius:6px; background:rgba(0,0,0,.6)}
+.vbadge svg{width:12px; height:12px}
+
+/* ===== OYUN / PROGRAM ===== */
+.a-hero{aspect-ratio:21/8; border-radius:18px; overflow:hidden; position:relative; margin-top:24px; box-shadow:0 0 0 1px var(--line)}
+.a-hero .ttl{position:absolute; left:clamp(18px,4vw,44px); bottom:clamp(16px,3vw,36px); right:20px}
+.a-hero h1{margin:0; font-size:clamp(32px,5vw,64px); font-weight:800; letter-spacing:-.03em; line-height:1; text-shadow:0 4px 30px rgba(0,0,0,.5)}
+.a-hero .pub{color:rgba(255,255,255,.8); font-size:15px; margin-top:6px}
+.a-wrap{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,360px); gap:clamp(24px,4vw,56px); align-items:start; padding-block:28px 60px}
+.a-main{display:grid; gap:8px}
+.a-main > p{margin:0 0 6px; font-size:17px; max-width:60ch; color:color-mix(in oklab, var(--text) 85%, var(--muted))}
+.shot{flex:none; width:min(320px, 70vw); aspect-ratio:16/9; border-radius:10px; overflow:hidden; position:relative; box-shadow:0 0 0 1px var(--line)}
+.card{background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:22px; display:grid; gap:16px; position:sticky; top:20px}
+.card .btn{width:100%}
+.card .size{color:var(--muted); font-size:14px; text-align:center; margin:-4px 0 0}
+.card h3{margin:6px 0 0; font-family:var(--f-body); font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); font-weight:600}
+.checks{display:grid; gap:10px; margin:0; padding:0; list-style:none}
+.checks li{display:grid; grid-template-columns:22px minmax(0,1fr); gap:10px; font-size:14.5px}
+.checks li span{color:var(--muted); display:block; font-size:13px}
+.ck{width:22px; height:22px; border-radius:50%; display:grid; place-items:center; font-size:13px; font-weight:700}
+.ck.ok{background:color-mix(in oklab, var(--ok) 22%, transparent); color:var(--ok)}
+.ck.no{background:color-mix(in oklab, var(--warn) 22%, transparent); color:var(--warn)}
+.verdict{display:flex; gap:10px; align-items:center; padding:12px 14px; border-radius:12px; font-size:14.5px; font-weight:600}
+.verdict.ok{background:color-mix(in oklab, var(--ok) 14%, transparent); color:var(--ok)}
+.verdict.no{background:color-mix(in oklab, var(--warn) 14%, transparent); color:var(--warn)}
+.progress{display:grid; gap:8px}
+.bar{height:3px; border-radius:3px; background:rgba(255,255,255,.12); overflow:hidden}
+.bar i{display:block; height:100%; width:0; background:var(--accent); transition:width .15s}
+.progress .bar{height:6px}
+.progress small{color:var(--muted); font-size:13.5px; display:flex; justify-content:space-between}
+
+/* ===== PROGRAM PAKETİ ===== */
+.pkgs{display:grid; gap:10px; padding-block:18px 140px; max-width:980px}
+.pkg{display:grid; grid-template-columns:28px 64px minmax(0,1fr) auto; gap:18px; align-items:center; padding:16px 18px; border-radius:16px; background:var(--panel); border:1px solid var(--line); text-align:left; width:100%; transition:border-color .2s}
+.pkg[aria-checked="true"]{border-color:color-mix(in oklab, var(--accent) 55%, transparent)}
+.pkg:disabled{cursor:default}
+.box{width:24px; height:24px; border-radius:7px; border:2px solid var(--faint); display:grid; place-items:center; color:var(--on-accent)}
+.pkg[aria-checked="true"] .box{background:var(--accent); border-color:var(--accent)}
+.box svg{width:15px; height:15px; opacity:0}
+.pkg[aria-checked="true"] .box svg{opacity:1}
+.icon{width:64px; height:64px; border-radius:16px; position:relative; overflow:hidden; box-shadow:0 0 0 1px var(--line)}
+.pkg b{font-size:17px}
+.pkg .tag{display:inline-block; margin-left:8px; font-size:12px; font-weight:600; padding:2px 8px; border-radius:6px; background:var(--raise); color:var(--muted); vertical-align:2px}
+.pkg p{margin:4px 0 0; color:var(--muted); font-size:14.5px}
+.pkg .st{text-align:right; font-size:14px; color:var(--muted); min-width:110px; font-variant-numeric:tabular-nums}
+.pkg .st.ok{color:var(--ok); font-weight:600}
+.pkg .st .bar{height:4px; margin-top:6px; width:110px}
+.bundlebar{position:fixed; left:0; right:0; bottom:0; z-index:15; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  padding-top:14px; padding-bottom:calc(14px + env(safe-area-inset-bottom,0px)); background:color-mix(in oklab, var(--panel) 92%, transparent); backdrop-filter:blur(20px); border-top:1px solid var(--line)}
+.bundlebar span{color:var(--muted)} .bundlebar span b{color:var(--text)}
+
+/* ===== BELGE ===== */
+.d-wrap{display:grid; grid-template-columns:minmax(0,340px) minmax(0,1fr); gap:clamp(28px,5vw,64px); align-items:center; padding-block:48px 60px; max-width:1000px}
+.pages{position:relative; aspect-ratio:3/4}
+.pages .pg{position:absolute; inset:0; background:#ece6d6; border-radius:6px; padding:12% 11%; box-shadow:0 20px 40px rgba(0,0,0,.5)}
+.pages .pg:nth-child(1){rotate:-6deg; translate:-4% 2%; filter:brightness(.8)}
+.pages .pg:nth-child(2){rotate:3deg; translate:3% 0; filter:brightness(.9)}
+.pages .pg i{display:block; height:3.4%; margin-bottom:5.4%; background:#cfc6b0; border-radius:2px}
+.pages .pg b{display:block; font-family:var(--f-display); color:#2a2418; font-size:clamp(16px,2.4vw,26px); margin-bottom:12%; line-height:1.05}
+.d-info{display:grid; gap:14px}
+.d-info h1{margin:0; font-size:clamp(32px,4.5vw,56px); font-weight:800; letter-spacing:-.03em; line-height:1}
+.d-info p{margin:0; color:var(--muted); font-size:17px; max-width:48ch}
+
+/* oynatıcı, bildirim, diyaloglar */
+.player{position:fixed; left:0; right:0; bottom:0; z-index:20; display:flex; align-items:center; gap:14px;
+  padding:12px max(clamp(16px,5vw,64px), env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(clamp(16px,5vw,64px), env(safe-area-inset-left,0px));
+  background:color-mix(in oklab, var(--panel) 90%, transparent); backdrop-filter:blur(20px); border-top:1px solid var(--line);
+  transform:translateY(110%); visibility:hidden; transition:transform .3s, visibility .3s}
+.player.on{transform:none; visibility:visible}
+.player .pc{width:44px; height:44px; border-radius:6px; overflow:hidden; position:relative; flex:none}
+.player .t{flex:1; min-width:0; display:grid; gap:6px}
+.player .t b{font-size:14.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.pbtn{width:44px; height:44px; border-radius:50%; display:grid; place-items:center; flex:none}
+.pbtn:hover{background:rgba(255,255,255,.08)}
+.pbtn.main{background:var(--text); color:var(--bg)}
+.pbtn svg{width:20px; height:20px}
+.toast{position:fixed; left:50%; top:calc(20px + env(safe-area-inset-top,0px)); z-index:40; translate:-50% -20px; opacity:0;
+  background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:12px 20px; font-size:15px; max-width:calc(100vw - 32px);
+  box-shadow:0 14px 40px rgba(0,0,0,.45); transition:opacity .25s, translate .25s; pointer-events:none}
+.toast.on{opacity:1; translate:-50% 0}
+dialog{border:1px solid var(--line); border-radius:20px; background:var(--panel); color:var(--text); padding:28px; width:min(420px, calc(100vw - 32px))}
+dialog::backdrop{background:rgba(4,5,10,.7)}
+dialog h3{margin:0 0 8px; font-size:24px}
+dialog p{margin:0 0 22px; color:var(--muted)}
+dialog .row{display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap}
+.lightbox{width:min(1000px, calc(100vw - 32px)); padding:0; overflow:hidden}
+.lb-img{aspect-ratio:3/2; position:relative}
+.lb-img > div{position:absolute; inset:0; animation:kb 4.2s ease-out forwards}
+@keyframes kb{from{transform:scale(1.1); opacity:.3} 20%{opacity:1} to{transform:scale(1)}}
+.lb-bar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 20px}
+.lb-bar .pbtn{background:rgba(255,255,255,.08)}
+
+/* ===== üretilmiş görseller (gerçekte builder'ın webp çıktıları) ===== */
+.a{position:absolute; inset:0}
+.vinyl,.vin{background:
+  radial-gradient(circle, #111 0 3%, var(--lab, #ff5fae) 3.5% 17%, rgba(0,0,0,.4) 17.5% 18.5%, transparent 19%),
+  repeating-radial-gradient(circle, #121214 0 1.2%, #1b1b1f 1.2% 2%), #111;
+  box-shadow:0 10px 30px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.06)}
+.vinyl::after,.vin::after{content:""; position:absolute; inset:0; border-radius:50%; background:conic-gradient(from 20deg, transparent 0 10%, rgba(255,255,255,.10) 14%, transparent 20% 60%, rgba(255,255,255,.08) 64%, transparent 70%)}
+.pt{position:absolute; left:9%; right:9%; bottom:7%; font-family:var(--f-display); font-weight:800; color:#fff; font-size:clamp(13px,1.6vw,24px); line-height:.95; letter-spacing:-.02em; text-shadow:0 2px 16px rgba(0,0,0,.5)}
+
+@media (max-width:760px){
+  .backdrop{inset:0 0 auto 0; height:50%; -webkit-mask:linear-gradient(to top, transparent, #000 50%); mask:linear-gradient(to top, transparent, #000 50%)}
+  .stage{padding-top:150px; min-height:0}
+  .f-head{grid-template-columns:minmax(0,130px) minmax(0,1fr); gap:18px; padding-top:140px}
+  .m-wrap,.a-wrap,.d-wrap{grid-template-columns:minmax(0,1fr)}
+  .record{max-width:340px}
+  .pages{max-width:220px}
+  .a-hero{aspect-ratio:16/10}
+  .card{position:static}
+  .btn{height:48px; padding:0 20px}
+  .ep{grid-template-columns:minmax(0,130px) minmax(0,1fr); gap:14px}
+  .ep .d{display:none}
+  .ep p{-webkit-line-clamp:1}
+  .pkg{grid-template-columns:24px 48px minmax(0,1fr); gap:12px}
+  .pkg .st{grid-column:3; text-align:left}
+  .icon{width:48px; height:48px; border-radius:12px}
+}
+@media (max-width:480px){ .f-head{grid-template-columns:minmax(0,1fr)} .poster{max-width:150px} }
+@media (prefers-reduced-motion:reduce){ *,*::before,*::after{animation:none!important; transition:none!important} }
+</style>
+
+<div class="demo gut" role="region" aria-label="Prototip kontrolü">
+  <b>Prototip</b><label for="scenario">Örnek disk:</label>
+  <select id="scenario">
+    <option value="mixed">Karışık içerik → ana menü</option>
+    <option value="film1">Sadece film (tek) → film sayfası</option>
+    <option value="films">Sadece film (koleksiyon) → film ızgarası</option>
+    <option value="series">Sadece film (dizi bölümleri) → dizi sayfası</option>
+    <option value="album1">Sadece müzik (tek albüm) → albüm sayfası</option>
+    <option value="albums">Sadece müzik (çok albüm) → müzik koleksiyonu</option>
+    <option value="app1">Sadece exe (tek oyun) → oyun sayfası</option>
+    <option value="apps">Sadece exe (çok kurulum) → program paketi</option>
+  </select>
+</div>
+<main id="root"></main>
+
+<div class="player" id="player" aria-label="Müzik çalar">
+  <div class="pc" id="pCover"></div>
+  <button class="pbtn" id="pPrev" aria-label="Önceki parça"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+  <button class="pbtn main" id="pPlay" aria-label="Duraklat"><svg viewBox="0 0 24 24" fill="currentColor" id="pIcon"></svg></button>
+  <button class="pbtn" id="pNext" aria-label="Sonraki parça"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+  <div class="t"><b id="pTitle"></b><div class="bar"><i id="pBar"></i></div></div>
+  <button class="pbtn" id="pStop" aria-label="Çaları kapat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<dialog id="confirm"><form method="dialog"><h3 id="cTitle"></h3><p id="cText"></p>
+  <div class="row"><button class="btn" value="no">Vazgeç</button><button class="btn primary" value="yes" id="cYes">Kur</button></div></form></dialog>
+<dialog id="lightbox" class="lightbox" aria-label="Fotoğraf görüntüleyici">
+  <div class="lb-img" id="lbImg"></div>
+  <div class="lb-bar"><span id="lbCap"></span>
+    <div style="display:flex; gap:8px">
+      <button class="pbtn" id="lbPrev" aria-label="Önceki"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="pbtn" id="lbNext" aria-label="Sonraki"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      <button class="pbtn" id="lbClose" aria-label="Kapat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div></div>
+</dialog>
+
+<script>
+/* ================= örnek veri ================= */
+const PC = { os:"Windows 11 23H2", ramGb:32, gpu:"RTX 4070", freeGb:212 }; // launcher: disc.system()
+
+const M = (o) => ({ type:"movie", kind:"Film", ...o, meta:`${o.year} · ${o.genre} · ${o.runtime}` });
+const FILMS = [
+  M({ id:"mv1", title:"Yapım Hikâyesi", year:2026, genre:"Belgesel", runtime:"1 sa 13 dk", rating:"8,4", shape:"city",
+      c:["#ffc46b","#d4472b","#3a0f1d","#13070d"], pal:["#ffb24a","#ff6b3d","#1a0c02"],
+      desc:"Stüdyonun ilk oyununun prototipten Steam'e kadar geçen 18 ayı.",
+      long:"Dört kişilik bir ekibin ilk oyununu prototipten Steam lansmanına taşıdığı 18 ayı, ekip üyelerinin ağzından anlatan belgesel. Kapalı beta, son dakika hataları ve lansman gecesi dahil.",
+      chapters:[["Fikir",0],["Prototip",840],["Kapalı beta",1980],["Lansman gecesi",3120]],
+      cast:[["Deniz","Kurucu, tasarım"],["Ece","Programlama"],["Mert","Sanat"],["Selin","Müzik"]], progress:0.35 }),
+  M({ id:"mv2", title:"Gece Vardiyası", year:2024, genre:"Dram", runtime:"1 sa 48 dk", rating:"7,9", shape:"sea",
+      c:["#9fe8ff","#1f6f9a","#0b2238","#04101c"], pal:["#7fd6ff","#1f6f9a","#021422"],
+      desc:"Bir liman şehrinde gece vardiyasında çalışan iki yabancının hikâyesi.",
+      long:"Bir liman şehrinde gece vardiyasında çalışan iki yabancı, sabaha kadar süren bir arıza boyunca birbirlerinin hayatına karışır.",
+      chapters:[["Liman",0],["Arıza",1500],["Şafak",5400]], cast:[["Arda","Kaptan"],["Lale","Teknisyen"]] }),
+  M({ id:"mv3", title:"Kuzey Rüzgârı", year:2023, genre:"Macera", runtime:"2 sa 02 dk", rating:"8,1", shape:"peaks",
+      c:["#ffffff","#8fb8d8","#2c4560","#141d2b"], pal:["#cfe6ff","#5d86b0","#0b1522"],
+      desc:"Kayıp bir meteoroloji istasyonunu arayan bir ekibin kış yolculuğu.",
+      long:"Kayıp bir meteoroloji istasyonunu arayan dört kişilik ekip, kışın en sert haftasında dağın kuzey yüzüne tırmanır.",
+      chapters:[["Kamp",0],["Fırtına",2700],["İstasyon",5900]], cast:[["Can","Rehber"],["Nil","Bilim insanı"]] }),
+  M({ id:"mv4", title:"Son Bölüm", year:2025, genre:"Gerilim", runtime:"1 sa 36 dk", rating:"7,4", shape:"trees",
+      c:["#d6ff9a","#3e8a4e","#12301f","#07140c"], pal:["#a6e88a","#3e8a4e","#06140a"],
+      desc:"Ormandaki kulübede yazılan son bölüm, yazarın hayatını değiştirir.",
+      long:"Romanının son bölümünü bitirmek için ormandaki bir kulübeye çekilen yazar, yazdıklarının gerçekleştiğini fark eder.",
+      chapters:[["Kulübe",0],["Mektup",2400],["Son sayfa",5100]], cast:[["Ozan","Yazar"],["Defne","Komşu"]] })
+];
+
+const SERIES = { id:"sr", type:"series", kind:"Dizi", title:"Ofis Günlükleri", year:"2025–2026", genre:"Komedi",
+  c:["#ffd36b","#e0743a","#3b1d2e","#170b14"], pal:["#ffcf6b","#e0743a","#1c0f02"], shape:"city",
+  long:"Küçük bir oyun stüdyosunun gündelik kaosu: teslim tarihleri, bozulan kahve makinesi ve hiç bitmeyen hata listesi.",
+  seasons:[
+    { no:1, eps:[["Pilot","Stüdyo ilk yatırımcı toplantısına hazırlanır.",24,1],["Teslim Gecesi","Demo sabaha yetişmek zorundadır.",23,1],["Kahve Krizi","Makine bozulur, verimlilik çöker.",25,.4],["Oyun Testi","İlk dış test oturumu beklenmedik geçer.",24,0],["Fuar","Ekip ilk kez stant açar.",26,0],["Lansman","Büyük gün geldi.",29,0]] },
+    { no:2, eps:[["Yeni Ofis","Taşınma hiç planlandığı gibi gitmez.",24,0],["Yama Günü","Kritik hata cuma akşamı bulunur.",23,0],["Ödül","Bir aday gösterimi herkesi gerer.",25,0],["Devam Oyunu","İkinci oyunun ilk fikri masada.",27,0]] }
+  ] };
+
+const A = (o) => ({ type:"album", kind:"Müzik albümü", artist:"side project GAMES", ...o });
+const ALBUMS = [
+  A({ id:"al1", title:"Original Soundtrack", year:2026, genre:"Synthwave", style:"sun", c:["#ffe76b","#ff6fa8","#1a0730","#4b0f5c"], pal:["#ff5fae","#7b3cff","#22031a"],
+      desc:"Oyunun synthwave müzikleri.", tracks:[["Ana Tema",214],["Gece Şehri",187],["Neon Yağmur",201],["Final Boss",176],["Jenerik",158]] }),
+  A({ id:"al2", title:"Lo-fi Çalışma Saatleri", year:2025, genre:"Lo-fi", style:"rings", c:["#ffd9a0","#c9864a","#2b1a12","#5a3622"], pal:["#f0b878","#a5622e","#1c0e04"],
+      desc:"Geliştirme gecelerinde dinlediğimiz sakin parçalar.", tracks:[["Yağmurlu Pazartesi",162],["Derleme",175],["Kahve Molası",149],["Gece 3",188]] }),
+  A({ id:"al3", title:"Akustik Oturumlar", year:2024, genre:"Akustik", style:"stripes", c:["#c8f5d8","#4fb38a","#0f2a22","#1d4a3a"], pal:["#7fe0b0","#2f8a66","#02160d"],
+      desc:"Oyun temalarının gitar ve piyano yorumları.", tracks:[["Ana Tema (Akustik)",201],["Köprü",176],["Eve Dönüş",219]] })
+];
+
+const GALLERY = { id:"gl", type:"gallery", kind:"Fotoğraf albümü", title:"Geliştirme Günlüğü",
+  meta:"Mart 2025 – Eylül 2026 · 9 fotoğraf · 1 video", desc:"Konsept çizimleri, ofis ve fuar kareleri.", pal:["#5fe0c4","#1f7a8c","#021a14"],
+  photos:[["Mart 2025","İlk konsept",["#f7b267","#f25c54"],"wide"],["Mart 2025","Karakter eskizleri",["#ffd6a5","#c97b63"]],["Mart 2025","Beyaz tahta",["#e9edc9","#7f8c6e"]],
+    ["Ağustos 2025","Ofisin ilk günü",["#7ad3c0","#2b6f8c"],"wide"],["Ağustos 2025","Gece mesaisi",["#4b4e9c","#141a3a"]],["Ağustos 2025","Test oturumu",["#9ad1d4","#2f5f73"]],
+    ["Ocak 2026","Fuar standı",["#c3a6ff","#5a3fd1"],"wide"],["Ocak 2026","Oyuncu kuyruğu",["#ffafcc","#8e4b7b"]],["Ocak 2026","Ödül töreni",["#ffe08a","#d98a2b"]],
+    ["Eylül 2026","Oynanış klibi",["#8be0ff","#2a6fb0"],"wide","0:31"]] };
+
+const GAME = { id:"gm", type:"app", sub:"game", kind:"Oyun", title:"Oyunumuz", publisher:"side project GAMES", version:"1.4.2", size:"3,2 GB",
+  meta:"Aksiyon-platform · Sürüm 1.4.2", desc:"Steam'de yayında olan aksiyon-platform oyunu.", pal:["#7fb2ff","#3a3fd8","#020a1f"],
+  long:"El yapımı 40 bölüm, yedi boss ve yerel çok oyunculu destek. Kontrolcü ile oynanması önerilir. Kurmadan da diskten başlatabilirsin; kayıtların bilgisayarında saklanır.",
+  portable:true, signed:true,
+  reqs:[["Sistem","Windows 10 64-bit","os",true],["Bellek","8 GB RAM","ram",8],["Ekran kartı","GTX 1060 / RX 580","gpu",true],["Boş alan","4 GB","disk",4]],
+  shots:[["#263aa8","#6ea8ff"],["#10163f","#3a3fd8"],["#3a3fd8","#ff8a5c"]] };
+const TOOL = { id:"tl", type:"app", sub:"tool", kind:"Program", title:"Seviye Editörü", publisher:"side project GAMES", version:"0.9.0", size:"120 MB",
+  meta:"Araç · Sürüm 0.9.0", desc:"Kendi bölümlerini tasarlayıp oyuna eklemen için editör.", pal:["#c9b6ff","#5b4b9c","#140b2a"],
+  long:"Oyundaki bölüm editörünün masaüstü sürümü. Bölümleri kaydedip oyunun 'Topluluk' menüsünden oynayabilirsin.", signed:false,
+  reqs:[["Sistem","Windows 10 / 11","os",true],["Bellek","4 GB RAM","ram",4],["Boş alan","500 MB","disk",0.5]], shots:[["#1b1734","#c9b6ff"]] };
+const DOC = { id:"dc", type:"doc", kind:"Belge", title:"Kullanım Kılavuzu", meta:"PDF · 24 sayfa · 2,4 MB", desc:"Oyun ve editör için kılavuz.",
+  long:"Kontroller, oyun modları, bölüm editörünün kullanımı ve sık sorulan sorular. Bilgisayarındaki PDF görüntüleyicide açılır.", pal:["#e8dcbc","#8a7a52","#1c160a"] };
+
+/* program paketi: ön gereksinim önce, zorunlu olan kaldırılamaz */
+const BUNDLE = [
+  { id:"p0", title:"Visual C++ Çalışma Zamanı", ver:"2015–2022 x64", size:"25 MB", desc:"Oyunların çalışması için gereken Microsoft bileşeni.", required:true, ic:["#5b8def","#1f3c88"], g:"C++" },
+  { id:"p1", title:"Oyunumuz", ver:"1.4.2", size:"3,2 GB", desc:"Aksiyon-platform oyunu.", on:true, ic:["#6ea8ff","#263aa8"], g:"▲" },
+  { id:"p2", title:"Seviye Editörü", ver:"0.9.0", size:"120 MB", desc:"Kendi bölümlerini tasarla. Yayıncı imzası yok.", on:true, ic:["#c9b6ff","#5b4b9c"], g:"✎" },
+  { id:"p3", title:"Ses Paketi", ver:"1.0", size:"640 MB", desc:"Yüksek kaliteli müzik ve ses efektleri (isteğe bağlı).", on:false, ic:["#ff8fc2","#8e2e64"], g:"♪" },
+  { id:"p4", title:"Kontrolcü Yardımcısı", ver:"2.1", size:"18 MB", desc:"Eski oyun kollarını Xbox kontrolcüsü gibi tanıtır.", on:false, ic:["#9be8c7","#2f7a5c"], g:"◎" }
+];
+
+const SCEN = {
+  mixed:  { title:"side project GAMES — Koleksiyon", root:"home", items:[FILMS[0], ALBUMS[0], GALLERY, GAME, TOOL, DOC] },
+  film1:  { title:"Yapım Hikâyesi", root:"page", items:[FILMS[0]] },
+  films:  { title:"Stüdyo Film Arşivi", root:"movies", items:FILMS },
+  series: { title:"Ofis Günlükleri", root:"series", items:[SERIES] },
+  album1: { title:"Original Soundtrack", root:"page", items:[ALBUMS[0]] },
+  albums: { title:"Stüdyo Müzikleri", root:"albums", items:ALBUMS },
+  app1:   { title:"Oyunumuz", root:"page", items:[GAME] },
+  apps:   { title:"Oyunumuz — Kurulum Diski", root:"bundle", items:BUNDLE }
+};
+
+/* ================= yardımcılar ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const mmss = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+const I = {
+  play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>',
+  install:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16"/></svg>',
+  doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  shuffle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>',
+  folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>',
+  film:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg>',
+  music:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
+  photo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/></svg>',
+  app:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>'
+};
+const PAUSE = '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>', PLAYP = '<path d="M7 4.5v15l12-7.5z"/>';
+
+/* ================= görseller ================= */
+const SHAPES = {
+  city:"polygon(0 70%,6% 70%,6% 40%,20% 40%,20% 55%,33% 55%,33% 25%,45% 25%,45% 48%,56% 48%,56% 35%,70% 35%,70% 58%,83% 58%,83% 45%,100% 45%,100% 100%,0 100%)",
+  peaks:"polygon(0 75%,15% 45%,25% 60%,42% 15%,58% 50%,70% 32%,85% 55%,100% 40%,100% 100%,0 100%)",
+  sea:"polygon(0 70%,10% 66%,20% 70%,30% 66%,40% 70%,50% 66%,60% 70%,70% 66%,80% 70%,90% 66%,100% 70%,100% 100%,0 100%)",
+  trees:"polygon(0 80%,5% 50%,10% 80%,14% 40%,20% 80%,26% 55%,31% 80%,38% 30%,45% 80%,52% 50%,58% 80%,66% 38%,73% 80%,80% 52%,86% 80%,92% 44%,100% 80%,100% 100%,0 100%)"
+};
+function movieArt(it, title){
+  const [s,m,d,g] = it.c;
+  return `<div class="a" style="background:radial-gradient(80% 55% at 50% 32%, ${s} 0%, ${m} 38%, ${d} 74%, ${g} 100%)">
+    <div style="position:absolute;left:50%;top:34%;width:42%;aspect-ratio:1;translate:-50% -50%;border-radius:50%;background:radial-gradient(circle at 40% 40%,#fff,${s} 55%,${m});box-shadow:0 0 60px ${s}"></div>
+    <div style="position:absolute;inset:40% 0 0;background:${g};clip-path:${SHAPES[it.shape]}"></div>
+    ${title ? `<div class="pt">${esc(it.title)}</div>` : ""}</div>`;
+}
+function albumArt(it){
+  const [a,b,sky,floor] = it.c;
+  if(it.style === "rings") return `<div class="a" style="background:radial-gradient(circle at 50% 55%, ${a} 0 8%, transparent 8.5%), repeating-radial-gradient(circle at 50% 55%, ${b} 0 4%, ${floor} 4% 8%), ${sky}"></div>`;
+  if(it.style === "stripes") return `<div class="a" style="background:linear-gradient(115deg, transparent 0 30%, ${b} 30% 46%, transparent 46% 52%, ${a} 52% 60%, transparent 60%), linear-gradient(${floor}, ${sky})"></div>`;
+  return `<div class="a" style="background:linear-gradient(${sky}, ${floor} 58%, ${sky} 58%)">
+    <div style="position:absolute;left:50%;top:58%;width:60%;aspect-ratio:2/1;translate:-50% -100%;border-radius:999px 999px 0 0;background:linear-gradient(${a}, ${b} 70%, #a14bff);mask:linear-gradient(#000 0 45%, transparent 0), repeating-linear-gradient(#000 0 6px, transparent 6px 9px)"></div>
+    <div style="position:absolute;inset:58% 0 0;background:repeating-linear-gradient(90deg, ${b}99 0 1px, transparent 1px 12.5%), repeating-linear-gradient(${b}99 0 1px, transparent 1px 22%);transform:perspective(120px) rotateX(48deg);transform-origin:top"></div></div>`;
+}
+const photoBg = c => `<div class="a" style="background:linear-gradient(${c[0]}, ${c[1]})"><div style="position:absolute;left:62%;top:22%;width:16%;aspect-ratio:1;border-radius:50%;background:color-mix(in oklab, ${c[0]} 40%, #fff);opacity:.85"></div><div style="position:absolute;inset:58% -5% 0;background:color-mix(in oklab, ${c[1]} 55%, #000);clip-path:polygon(0 40%,22% 10%,45% 35%,70% 0,100% 30%,100% 100%,0 100%)"></div><div style="position:absolute;inset:74% -5% 0;background:color-mix(in oklab, ${c[1]} 30%, #000);clip-path:polygon(0 30%,30% 0,60% 40%,85% 15%,100% 35%,100% 100%,0 100%)"></div></div>`;
+function appArt(it){
+  return it.sub === "game"
+    ? `<div class="a" style="background:linear-gradient(160deg, #10163f 0%, #263aa8 55%, #6ea8ff 100%)"><div style="position:absolute;left:46%;top:30%;height:16%;aspect-ratio:1;border-radius:30%;background:#ffdf6b;box-shadow:0 0 24px #ffdf6b;rotate:12deg"></div><div style="position:absolute;inset:auto -10% -6% -10%;height:55%;background:#0b0f2c;clip-path:${SHAPES.peaks}"></div></div>`
+    : `<div class="a" style="background-color:#1b1734;background-image:linear-gradient(rgba(201,182,255,.14) 1px, transparent 1px), linear-gradient(90deg, rgba(201,182,255,.14) 1px, transparent 1px);background-size:8% 12%">${[[14,22,30,24],[48,46,30,22],[22,58,14,16]].map(([l,t,w,h]) => `<div style="position:absolute;left:${l}%;top:${t}%;width:${w}%;height:${h}%;border:2px solid #c9b6ff;border-radius:3px;background:rgba(201,182,255,.12)"></div>`).join("")}</div>`;
+}
+const docArt = () => `<div class="a" style="background:#ece6d6;padding:16% 13%">${["100%","78%","100%","60%","100%","70%"].map(w => `<i style="display:block;width:${w};height:4%;margin-bottom:8%;background:#cfc6b0;border-radius:2px"></i>`).join("")}</div>`;
+function art(it, title){
+  switch(it.type){
+    case "movie": case "series": return movieArt(it, title);
+    case "album": return albumArt(it);
+    case "gallery": return photoBg(it.photos[0][2]);
+    case "app": return appArt(it);
+    case "doc": return docArt();
+  }
+}
+const pkgIcon = p => `<div class="a" style="background:linear-gradient(135deg, ${p.ic[0]}, ${p.ic[1]});display:grid;place-items:center;font-family:var(--f-display);font-weight:800;color:#fff;font-size:20px">${esc(p.g)}</div>`;
+
+/* ================= durum ================= */
+let SC = SCEN.mixed, stack = [], cur = 0, ORDER = [];
+const GROUPS = [["movie","Film",I.film],["album","Müzik",I.music],["gallery","Fotoğraf",I.photo],["app","Oyun ve program",I.app],["doc","Belge",I.doc]];
+function palette(p){ const r = document.documentElement.style; r.setProperty("--accent", p[0]); r.setProperty("--glow", p[1]); r.setProperty("--on-accent", p[2]); }
+const vt = fn => document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches ? document.startViewTransition(fn) : fn();
+const find = id => SC.items.find(x => x.id === id);
+
+/* gezinme: root görünüm + üstüne açılan sayfalar */
+function show(view, push = true){
+  if(push) stack.push(view);
+  vt(() => { $("#root").innerHTML = VIEWS[view.v](view); window.scrollTo(0,0); afterRender(view); });
+}
+function back(){ if(stack.length > 1){ stack.pop(); const v = stack[stack.length - 1]; show(v, false); } }
+function header(){
+  if(stack.length > 1){
+    const parent = stack[stack.length - 2].v;
+    const label = {home:"Ana menü", movies:"Tüm filmler", albums:"Tüm albümler", series:"Bölümler", bundle:"Paket"}[parent] ?? "Geri";
+    return `<nav class="topnav gut"><button class="back" data-back>${I.back}${label}</button><span class="dt">${esc(SC.title)}</span></nav>`;
+  }
+  return `<nav class="topnav gut"><div class="brand"><span class="dot"></span><b>${esc(SC.title)}</b></div></nav>`;
+}
+
+/* ================= görünümler ================= */
+const VIEWS = {
+  /* --- karışık: ana menü --- */
+  home: () => {
+    ORDER = GROUPS.flatMap(([t]) => SC.items.filter(x => x.type === t));
+    return `<div class="home"><div class="glow"></div><div class="backdrop" id="backdrop"></div>
+      ${header()}
+      <section class="stage gut" aria-live="polite"><div class="info"><div class="kind" id="kind"></div><h1 id="title"></h1><div class="meta" id="meta"></div><p class="desc" id="desc"></p><div class="buttons" id="buttons"></div></div></section>
+      <nav class="shelf gut" aria-label="Diskteki içerik"><div class="groups">${GROUPS.map(([t,label,ic]) => {
+        const list = SC.items.filter(x => x.type === t); if(!list.length) return "";
+        return `<div class="group" role="group" aria-label="${label}"><div class="glabel">${ic}${label}</div><div class="gtiles">${list.map(it => {
+          const i = ORDER.indexOf(it);
+          return `<button class="tile t-${it.type}" data-i="${i}" aria-label="${esc(it.kind)}: ${esc(it.title)}"><div class="art">${tileArt(it)}</div><div class="lbl">${esc(it.title)}</div></button>`; }).join("")}</div></div>`;
+      }).join("")}</div></nav>
+      <div class="hints gut"><span><kbd>← →</kbd>Seç</span><span><kbd>Enter</kbd>Sayfasını aç</span><span><kbd>Esc</kbd>Geri</span></div></div>`;
+  },
+
+  /* --- çok film --- */
+  movies: () => `<div class="glow"></div>${header()}
+    <section class="coll-head gut"><div><div class="kind">Film koleksiyonu</div><h1>${esc(SC.title)}</h1><div class="meta">${SC.items.length} film · toplam ${totalRuntime(SC.items)}</div></div>
+      ${resumeItem() ? `<button class="btn primary" data-resume>${I.play}Devam et: ${esc(resumeItem().title)}</button>` : ""}</section>
+    <section class="cgrid gut">${SC.items.map(it => `<button class="ccard" data-open="${it.id}" style="--cc:${it.pal[0]}"><div class="cv">${movieArt(it, true)}</div>${it.progress ? `<div class="prog"><i style="width:${it.progress*100}%"></i></div>` : ""}<b>${esc(it.title)}</b><span>${it.year} · ${it.genre} · ${it.runtime}</span></button>`).join("")}</section>`,
+
+  /* --- çok albüm --- */
+  albums: () => `<div class="glow"></div>${header()}
+    <section class="coll-head gut"><div><div class="kind">Müzik koleksiyonu</div><h1>${esc(SC.title)}</h1><div class="meta">${SC.items.length} albüm · ${SC.items.reduce((s,a) => s + a.tracks.length, 0)} parça</div></div>
+      <button class="btn primary" data-shuffleall>${I.shuffle}Tümünü karışık çal</button></section>
+    <section class="cgrid sq gut">${SC.items.map(it => `<button class="ccard" data-open="${it.id}" style="--cc:${it.pal[0]};--lab:${it.pal[0]}"><div class="cv"><div class="vin"></div><div class="cvi">${albumArt(it)}</div></div><b>${esc(it.title)}</b><span>${esc(it.artist)} · ${it.year} · ${it.tracks.length} parça</span></button>`).join("")}</section>`,
+
+  /* --- dizi --- */
+  series: (v) => {
+    const s = SC.items[0], season = v.season ?? 1, ss = s.seasons.find(x => x.no === season);
+    const next = nextEpisode(s);
+    return `<div class="glow"></div><div class="f-hero"><div>${movieArt(s)}</div></div>${header()}
+    <section class="f-head gut" style="grid-template-columns:minmax(0,1fr)"><div class="f-info">
+      <div class="kind">Dizi · ${s.seasons.length} sezon</div><h1>${esc(s.title)}</h1>
+      <div class="meta">${s.year} · ${s.genre} · ${s.seasons.reduce((n,x) => n + x.eps.length, 0)} bölüm</div>
+      <p>${esc(s.long)}</p>
+      <div class="buttons"><button class="btn primary" data-ep="${next.s}-${next.e}">${I.play}${next.started ? "Devam et" : "İzle"}: ${next.s}. Sezon ${next.e + 1}. Bölüm</button></div>
+    </div></section>
+    <section class="sec gut"><div class="seg lg" role="tablist" aria-label="Sezon">${s.seasons.map(x => `<button role="tab" aria-pressed="${x.no === season}" data-season="${x.no}">${x.no}. Sezon</button>`).join("")}</div>
+      <div class="eps">${ss.eps.map(([t,d,min,w],i) => `<button class="ep" data-ep="${season}-${i}"><div class="th">${movieArt({...s, c:shiftC(s.c, i + season*3)})}<div class="pl">${I.play}</div>${w ? `<div class="wbar"><i style="width:${w*100}%"></i></div>` : ""}</div>
+        <div><b>${i+1}. ${esc(t)}</b><p>${esc(d)}</p>${w === 1 ? `<span class="seen">✓ İzlendi</span>` : ""}</div><span class="d">${min} dk</span></button>`).join("")}</div></section>`;
+  },
+
+  /* --- program paketi --- */
+  bundle: () => `<div class="glow"></div>${header()}
+    <section class="coll-head gut"><div><div class="kind">Kurulum diski</div><h1>${esc(SC.title)}</h1><div class="meta">Kurmak istediklerini seç. Gerekli bileşenler otomatik kurulur.</div></div></section>
+    <section class="pkgs gut">${SC.items.map(p => `<button class="pkg" role="checkbox" aria-checked="${!!(p.required || p.on)}" data-pkg="${p.id}" ${p.required ? "disabled" : ""}>
+      <span class="box">${I.check}</span><span class="icon">${pkgIcon(p)}</span>
+      <span style="min-width:0"><b>${esc(p.title)}</b>${p.required ? `<span class="tag">Gerekli</span>` : ""}<p>${esc(p.desc)} · Sürüm ${esc(p.ver)}</p></span>
+      <span class="st" id="st-${p.id}">${p.size}</span></button>`).join("")}</section>
+    <div class="bundlebar gut"><span id="bsum"></span><button class="btn primary" id="binstall">${I.install}Seçilenleri kur</button></div>`,
+
+  /* --- tek öğe sayfası --- */
+  page: (v) => {
+    const it = find(v.id); palette(it.pal);
+    return PAGES[it.type](it);
+  }
+};
+function tileArt(it){
+  if(it.type === "album") return `<div class="vinyl" style="--lab:${it.pal[0]}"></div><div class="face">${art(it)}</div>`;
+  if(it.type === "gallery") return `<div class="face">${[0,3,6].map((k,i) => `<div class="ph" style="inset:${["6% 14% 14% 2%","2% 2% 18% 16%","18% 10% 0 8%"][i]};rotate:${[-8,6,-1][i]}deg;background:#f3efe6;padding:5% 5% 14%"><div style="position:relative;height:100%;border-radius:2px;overflow:hidden">${photoBg(it.photos[k][2])}</div></div>`).join("")}</div>`;
+  return `<div class="face">${art(it, it.type === "movie")}</div>`;
+}
+const shiftC = (c, k) => { const r = [...c]; if(k % 2) [r[0], r[1]] = [r[1], r[0]]; return r; };
+const toMin = s => { const m = s.match(/(\d+) sa (\d+)/); return m ? +m[1]*60 + +m[2] : 0; };
+const totalRuntime = list => { const t = list.reduce((s,x) => s + toMin(x.runtime), 0); return `${Math.floor(t/60)} sa ${t%60} dk`; };
+const resumeItem = () => SC.items.find(x => x.progress);
+function nextEpisode(s){
+  for(const ss of s.seasons) for(let i = 0; i < ss.eps.length; i++) if(ss.eps[i][3] < 1) return {s:ss.no, e:i, started:ss.eps[i][3] > 0};
+  return {s:1, e:0, started:false};
+}
+
+/* ================= tür sayfaları ================= */
+const PAGES = {
+  movie: it => `<div class="glow"></div><div class="f-hero"><div>${movieArt(it)}</div></div>${header()}
+    <section class="f-head gut"><div class="poster">${movieArt(it, true)}</div>
+      <div class="f-info"><div class="kind">Film</div><h1>${esc(it.title)}</h1>
+        <div class="meta">${it.year} · ${it.genre} · ${it.runtime} · ★ ${it.rating}</div><p>${esc(it.long)}</p>
+        <div class="buttons"><button class="btn primary" data-watch="${it.id}">${I.play}${it.progress ? "Kaldığın yerden devam et" : "İzle"}</button>${it.progress ? `<button class="btn" data-watch="${it.id}" data-from="0">Baştan izle</button>` : ""}</div>
+        <div class="tracksel"><span>Ses: Türkçe · Stereo</span><span style="display:inline-flex;align-items:center;gap:10px">Altyazı <span class="seg" role="group" aria-label="Altyazı"><button aria-pressed="true" data-sub>Kapalı</button><button aria-pressed="false" data-sub>English</button></span></span></div>
+      </div></section>
+    <section class="sec gut"><h2>Bölümler</h2><div class="hrow">${it.chapters.map(([t,s],i) =>
+      `<button class="chap" data-chapter="${s}"><div class="th">${movieArt({...it, c:shiftC(it.c, i)})}<span class="tm">${mmss(s)}</span></div><b>${esc(t)}</b></button>`).join("")}</div></section>
+    <section class="sec gut" style="padding-bottom:60px"><h2>Oyuncular ve ekip</h2><div class="hrow">${it.cast.map(([n,r]) =>
+      `<div class="person"><div class="avatar" style="background:linear-gradient(135deg, ${it.c[1]}, ${it.c[3]})">${n[0]}</div><b>${esc(n)}</b><span>${esc(r)}</span></div>`).join("")}</div></section>`,
+
+  album: it => {
+    const total = it.tracks.reduce((s,t) => s + t[1], 0);
+    return `<div class="glow"></div>${header()}
+    <section class="m-wrap gut">
+      <div class="record" id="record" style="--lab:${it.pal[0]}"><div class="vinyl"></div><div class="cover">${albumArt(it)}</div></div>
+      <div class="m-info"><div class="kind">Albüm</div><h1>${esc(it.title)}</h1><div class="artist">${esc(it.artist)}</div>
+        <div class="meta">${it.year} · ${it.genre} · ${it.tracks.length} parça · ${Math.round(total/60)} dk</div>
+        <div class="buttons" style="margin-top:6px"><button class="btn primary" data-play="0">${I.play}Çal</button><button class="btn" data-shuffle>${I.shuffle}Karışık çal</button></div>
+        <div class="tracks">${it.tracks.map(([t,d],i) => `<button class="trk" data-play="${i}"><span class="n">${i+1}</span><span class="t">${esc(t)}</span><span class="d">${mmss(d)}</span></button>`).join("")}</div>
+      </div></section>`;
+  },
+
+  gallery: it => {
+    const months = [...new Set(it.photos.map(p => p[0]))];
+    return `<div class="glow"></div>${header()}
+    <section class="g-head gut"><div><div class="kind">Fotoğraf albümü</div><h1>${esc(it.title)}</h1><div class="meta">${esc(it.meta)}</div></div>
+      <button class="btn primary" data-slides>${I.play}Slayt gösterisi</button></section>
+    <section class="gut" style="padding-bottom:60px">${months.map(m => `<div class="month"><h3>${m}</h3><div class="pgrid">${
+      it.photos.map((p,i) => [p,i]).filter(([p]) => p[0] === m).map(([p,i]) => `<button class="${p[3] ?? ""}" data-photo="${i}" aria-label="${esc(p[1])}">${photoBg(p[2])}${p[4] ? `<span class="vbadge">${I.play}${p[4]}</span>` : ""}</button>`).join("")
+    }</div></div>`).join("")}</section>`;
+  },
+
+  app: it => {
+    const checks = it.reqs.map(([k,v,key,need]) => {
+      const ok = key === "ram" ? PC.ramGb >= need : key === "disk" ? PC.freeGb >= need : true;
+      const have = {os:PC.os, ram:`${PC.ramGb} GB`, gpu:PC.gpu, disk:`${PC.freeGb} GB boş`}[key];
+      return {ok, html:`<li><span class="ck ${ok ? "ok" : "no"}">${ok ? "✓" : "!"}</span><div>${esc(k)}: ${esc(v)}<span>Bu bilgisayar: ${esc(have)}</span></div></li>`};
+    });
+    const allOk = checks.every(c => c.ok);
+    return `<div class="glow"></div>${header()}
+    <section class="gut"><div class="a-hero">${appArt(it)}<div class="ttl"><h1>${esc(it.title)}</h1><div class="pub">${esc(it.publisher)} · Sürüm ${it.version}</div></div></div></section>
+    <section class="a-wrap gut">
+      <div class="a-main"><div class="kind">${esc(it.kind)}</div><p>${esc(it.long)}</p>
+        <div class="sec" style="padding-top:8px"><h2>Ekran görüntüleri</h2><div class="hrow">${it.shots.map(c => `<div class="shot">${photoBg(c)}</div>`).join("")}</div></div></div>
+      <aside class="card">
+        <div class="verdict ${allOk ? "ok" : "no"}">${allOk ? "✓ Bu bilgisayarda çalışır" : "! Bazı gereksinimler karşılanmıyor"}</div>
+        <div id="installArea"><button class="btn primary" data-install="${it.id}">${I.install}Kur</button></div>
+        <p class="size">Kurulum boyutu ${it.size}${it.signed ? "" : " · Yayıncı imzası yok"}</p>
+        ${it.portable ? `<button class="btn" data-portable>${I.play}Kurmadan diskten oyna</button>` : ""}
+        <button class="btn" data-files>${I.folder}Disk dosyalarına göz at</button>
+        <h3>Sistem gereksinimleri</h3><ul class="checks">${checks.map(c => c.html).join("")}</ul>
+      </aside></section>`;
+  },
+
+  doc: it => `<div class="glow"></div>${header()}
+    <section class="d-wrap gut">
+      <div class="pages"><div class="pg"><i></i><i></i></div><div class="pg"><i></i><i></i></div><div class="pg"><b>${esc(it.title)}</b><i></i><i style="width:80%"></i><i></i><i style="width:65%"></i><i></i></div></div>
+      <div class="d-info"><div class="kind">Belge</div><h1>${esc(it.title)}</h1><div class="meta">${esc(it.meta)}</div><p>${esc(it.long)}</p>
+        <div class="buttons"><button class="btn primary" data-opendoc>${I.doc}Aç</button><button class="btn" data-files>${I.folder}Klasörde göster</button></div></div></section>`
+};
+
+/* ================= render sonrası ================= */
+function afterRender(view){
+  if(view.v === "home") focusItem(cur, false);
+  else if(view.v === "page") palette(find(view.id).pal);
+  else if(view.v === "series") palette(SC.items[0].pal);
+  else palette(SC.items[0].pal ?? ["#7fb2ff","#3a3fd8","#020a1f"]);
+  if(view.v === "bundle") updateBundle();
+  paintPlayer();
+  setTimeout(() => (view.v === "home" ? null : $("#root .btn.primary, #root .ccard, #root .pkg:not(:disabled)"))?.focus({preventScroll:true}), 80);
+}
+
+/* ana menü odağı */
+function focusItem(i, moveFocus){
+  cur = (i + ORDER.length) % ORDER.length;
+  const it = ORDER[cur]; palette(it.pal);
+  $("#backdrop").innerHTML = `<div>${art(it)}</div>`;
+  $("#kind").textContent = it.kind; $("#title").textContent = it.title; $("#meta").textContent = it.meta; $("#desc").textContent = it.desc;
+  const q = {movie:[I.play,"İzle"], album:[I.play,"Çal"], gallery:[I.play,"Slayt gösterisi"], app:[I.install,"Kur"], doc:[I.doc,"Aç"]}[it.type];
+  $("#buttons").innerHTML = `<button class="btn primary" data-quick="${it.id}">${q[0]}${q[1]}</button><button class="btn" data-open="${it.id}">${it.type === "album" ? "Albüme git" : it.type === "gallery" ? "Fotoğraflara git" : "Ayrıntılar"}</button>`;
+  document.querySelectorAll(".tile").forEach(t => t.setAttribute("aria-current", +t.dataset.i === cur));
+  const tile = document.querySelector(`.tile[data-i="${cur}"]`);
+  tile?.scrollIntoView({block:"nearest", inline:"nearest", behavior:"smooth"});
+  if(moveFocus) tile?.focus({preventScroll:true});
+}
+
+/* ================= eylemler ================= */
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 2600); }
+function quick(id){
+  const it = find(id);
+  if(it.type === "movie") return toast("Film tam ekran açılıyor…");
+  if(it.type === "album") return startPlayer(it, 0);
+  if(it.type === "gallery") return openLightbox(it, 0, true);
+  if(it.type === "app") return show({v:"page", id});
+  if(it.type === "doc") return toast("Kılavuz PDF görüntüleyicide açılıyor…");
+}
+function confirmDlg(title, text, yes, onYes){
+  $("#cTitle").textContent = title; $("#cText").textContent = text; $("#cYes").textContent = yes;
+  const d = $("#confirm"); d.returnValue = ""; d.showModal();
+  d.onclose = () => { if(d.returnValue === "yes") onYes(); };
+}
+function installApp(it){
+  confirmDlg(`${it.title} kurulsun mu?`, it.signed ? `Bilgisayarına ${it.size} alan gerekecek. Windows izin isteyecek.` : `Bu programın yayıncı imzası yok. Kaynağına güveniyorsan devam et. Windows izin isteyecek.`, "Kur", () => {
+    let p = 0; const area = $("#installArea");
+    const step = () => {
+      if(!document.body.contains(area)) return;
+      p = Math.min(100, p + 4 + Math.random()*6);
+      area.innerHTML = p < 100
+        ? `<div class="progress"><div class="bar"><i style="width:${p}%"></i></div><small><span>Kuruluyor…</span><span>%${Math.round(p)}</span></small></div>`
+        : `<button class="btn primary" data-launch>${I.play}${it.sub === "game" ? "Oyna" : "Başlat"}</button>`;
+      if(p < 100) setTimeout(step, 150); else toast(`${it.title} kuruldu`);
+    };
+    step();
+  });
+}
+
+/* program paketi */
+function updateBundle(){
+  const sel = SC.items.filter(p => document.querySelector(`[data-pkg="${p.id}"]`)?.getAttribute("aria-checked") === "true");
+  const mb = sel.reduce((s,p) => s + (p.size.includes("GB") ? parseFloat(p.size.replace(",", ".")) * 1024 : parseFloat(p.size)), 0);
+  const n = sel.filter(p => !p.required).length;
+  $("#bsum").innerHTML = `<b>${n} program</b> seçildi · toplam ${mb >= 1024 ? (mb/1024).toFixed(1).replace(".", ",") + " GB" : Math.round(mb) + " MB"}`;
+  $("#binstall").disabled = n === 0;
+}
+function installBundle(){
+  const sel = SC.items.filter(p => document.querySelector(`[data-pkg="${p.id}"]`).getAttribute("aria-checked") === "true");
+  confirmDlg(`${sel.filter(p => !p.required).length} program kurulsun mu?`, "Programlar sırayla kurulacak. Windows bir kez izin isteyecek.", "Kur", () => {
+    document.querySelectorAll(".pkg").forEach(b => b.disabled = true);
+    $("#binstall").disabled = true;
+    let k = 0;
+    const next = () => {
+      if(k >= sel.length){ $("#bsum").innerHTML = `<b>Kurulum tamamlandı.</b> Oyunu Başlat menüsünden açabilirsin.`; $("#binstall").outerHTML = `<button class="btn primary" data-launch>${I.play}Oyunu başlat</button>`; return toast("Tüm programlar kuruldu"); }
+      const p = sel[k], st = $(`#st-${p.id}`); let v = 0;
+      $("#bsum").innerHTML = `<b>${k+1}/${sel.length}</b> · ${esc(p.title)} kuruluyor…`;
+      const tick = () => {
+        if(!document.body.contains(st)) return;
+        v = Math.min(100, v + 8 + Math.random()*12);
+        if(v < 100){ st.innerHTML = `%${Math.round(v)}<div class="bar"><i style="width:${v}%"></i></div>`; setTimeout(tick, 110); }
+        else { st.className = "st ok"; st.textContent = "✓ Kuruldu"; k++; next(); }
+      };
+      tick();
+    };
+    next();
+  });
+}
+
+/* müzik çalar */
+const P = {alb:null, i:0, t:0, playing:false, h:null};
+function startPlayer(alb, i){
+  Object.assign(P, {alb, i, t:0, playing:true});
+  $("#pCover").innerHTML = albumArt(alb); $("#player").classList.add("on"); document.body.classList.add("playing"); paintPlayer();
+  clearInterval(P.h); P.h = setInterval(() => { if(!P.playing) return; if(++P.t >= P.alb.tracks[P.i][1]) nextT(1); paintPlayer(); }, 100);
+}
+function nextT(d){ const n = P.alb.tracks.length; P.i = (P.i + d + n) % n; P.t = 0; paintPlayer(); }
+function paintPlayer(){
+  const top = stack[stack.length - 1];
+  const onThis = P.alb && top?.v === "page" && top.id === P.alb.id;
+  $("#record")?.classList.toggle("spin", !!(onThis && P.playing));
+  document.querySelectorAll(".trk").forEach((b, i) => {
+    const now = onThis && i === P.i; b.classList.toggle("now", now);
+    b.querySelector(".n").innerHTML = now ? `<span class="eq${P.playing ? "" : " paused"}"><i></i><i></i><i></i></span>` : i + 1;
+  });
+  if(!P.alb) return;
+  const [name, dur] = P.alb.tracks[P.i];
+  $("#pTitle").textContent = `${name} · ${P.alb.title} · ${mmss(P.t)} / ${mmss(dur)}`;
+  $("#pBar").style.width = `${P.t / dur * 100}%`;
+  $("#pIcon").innerHTML = P.playing ? PAUSE : PLAYP;
+  $("#pPlay").setAttribute("aria-label", P.playing ? "Duraklat" : "Çal");
+}
+function stopPlayer(){ clearInterval(P.h); P.alb = null; P.playing = false; $("#player").classList.remove("on"); document.body.classList.remove("playing"); paintPlayer(); }
+$("#pPlay").onclick = () => { P.playing = !P.playing; paintPlayer(); };
+$("#pNext").onclick = () => nextT(1);
+$("#pPrev").onclick = () => nextT(-1);
+$("#pStop").onclick = stopPlayer;
+
+/* fotoğraf görüntüleyici */
+const LB = {g:null, i:0, h:null};
+function openLightbox(g, i, auto){ LB.g = g; LB.i = i; slide(); $("#lightbox").showModal(); clearInterval(LB.h); if(auto) LB.h = setInterval(() => lbStep(1), 4000); }
+function lbStep(d){ const n = LB.g.photos.length; LB.i = (LB.i + d + n) % n; slide(); }
+function slide(){ const p = LB.g.photos[LB.i]; $("#lbImg").innerHTML = `<div>${photoBg(p[2])}</div>`; $("#lbCap").textContent = `${p[1]} · ${p[0]} · ${LB.i + 1}/${LB.g.photos.length}`; }
+$("#lbNext").onclick = () => lbStep(1); $("#lbPrev").onclick = () => lbStep(-1);
+$("#lbClose").onclick = () => $("#lightbox").close();
+$("#lightbox").addEventListener("close", () => clearInterval(LB.h));
+
+/* ================= olaylar ================= */
+document.addEventListener("click", e => {
+  const t = e.target.closest("#root button, .bundlebar button"); if(!t) return;
+  const d = t.dataset, top = stack[stack.length - 1], it = top.v === "page" ? find(top.id) : null;
+  if(t.classList.contains("tile")) return +d.i === cur ? show({v:"page", id:ORDER[cur].id}) : focusItem(+d.i);
+  if("back" in d) return back();
+  if("quick" in d) return quick(d.quick);
+  if("open" in d) return show({v:"page", id:d.open});
+  if("watch" in d) return toast(d.from === "0" ? "Film baştan açılıyor…" : it.progress ? `Film ${Math.round(it.progress*100)}% noktasından devam ediyor…` : "Film tam ekran açılıyor…");
+  if("resume" in d) return toast(`${resumeItem().title} kaldığın yerden açılıyor…`);
+  if("chapter" in d) return toast(`Film ${mmss(+d.chapter)} noktasından açılıyor…`);
+  if("sub" in d){ t.parentElement.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b === t)); return; }
+  if("season" in d){ stack[stack.length - 1] = {v:"series", season:+d.season}; return show(stack[stack.length - 1], false); }
+  if("ep" in d){ const [s, e2] = d.ep.split("-").map(Number); const ep = SC.items[0].seasons.find(x => x.no === s).eps[e2]; return toast(`${s}. Sezon ${e2 + 1}. Bölüm “${ep[0]}” açılıyor…`); }
+  if("play" in d) return startPlayer(it, +d.play);
+  if("shuffle" in d){ startPlayer(it, Math.floor(Math.random() * it.tracks.length)); return toast("Karışık çalınıyor"); }
+  if("shuffleall" in d){ const a = SC.items[Math.floor(Math.random() * SC.items.length)]; startPlayer(a, Math.floor(Math.random() * a.tracks.length)); return toast("Tüm albümler karışık çalınıyor"); }
+  if("slides" in d) return openLightbox(it, 0, true);
+  if("photo" in d) return openLightbox(it, +d.photo, false);
+  if("install" in d) return installApp(it);
+  if("portable" in d) return toast("Oyun diskten başlatılıyor…");
+  if("launch" in d) return toast("Oyun başlatılıyor…");
+  if("files" in d) return toast("Dosyalar Gezgin'de açılıyor");
+  if("opendoc" in d) return toast("Kılavuz PDF görüntüleyicide açılıyor…");
+  if("pkg" in d){ t.setAttribute("aria-checked", t.getAttribute("aria-checked") !== "true"); return updateBundle(); }
+  if(t.id === "binstall") return installBundle();
+});
+document.addEventListener("keydown", e => {
+  if(document.querySelector("dialog[open]") || e.target.tagName === "SELECT") return;
+  const top = stack[stack.length - 1];
+  if(e.key === "Escape" && stack.length > 1){ e.preventDefault(); return back(); }
+  if(top.v !== "home") return;
+  if(e.key === "ArrowRight"){ e.preventDefault(); focusItem(cur + 1, true); }
+  if(e.key === "ArrowLeft"){ e.preventDefault(); focusItem(cur - 1, true); }
+  if(e.key === "Enter" && document.activeElement?.classList.contains("tile")){ e.preventDefault(); show({v:"page", id:ORDER[cur].id}); }
+});
+
+/* senaryo değiştirici (yalnızca prototip) */
+function load(key){
+  SC = SCEN[key]; stack = []; cur = 0; stopPlayer();
+  const r = SC.root;
+  show(r === "page" ? {v:"page", id:SC.items[0].id} : {v:r});
+}
+$("#scenario").addEventListener("change", e => { load(e.target.value); try{ history.replaceState(null, "", "#" + e.target.value); }catch{} });
+const startKey = (location.hash || "").slice(1);
+if(SCEN[startKey]) $("#scenario").value = startKey;
+load($("#scenario").value);
+</script>

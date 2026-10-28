@@ -1,0 +1,29 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { global-json-file: global.json }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      # The page SDK (embedded in the launcher and the builder) and the builder UI (copied next to Inlay.exe).
+      - run: npm run build
+      - name: FFmpeg (LGPL build used by the builder and the media tests)
+        shell: bash
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          gh release download latest --repo BtbN/FFmpeg-Builds -p 'ffmpeg-n8.1-latest-win64-lgpl-shared-8.1.zip' -p checksums.sha256 -D tools/dl
+          (cd tools/dl && grep 'n8.1-latest-win64-lgpl-shared-8.1.zip' checksums.sha256 | sha256sum -c -)
+          unzip -q tools/dl/*.zip -d tools && mv tools/ffmpeg-n8.1-latest-win64-lgpl-shared-8.1 tools/ffmpeg
+      - name: Launcher (NativeAOT, must stay ≤ 10 MB)
+        shell: pwsh
+        run: |
+          dotnet publish src/Inlay.Launcher -c Release -o artifacts/launcher
+          $mb = (Get-Item artifacts/launcher/Baslat.exe).Length / 1MB
+          if ($mb -gt 10) { throw "Baslat.exe is $mb MB" }
+      - run: dotnet test --solution Inlay.slnx
+      - run: npm test

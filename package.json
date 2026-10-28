@@ -1,0 +1,43 @@
+{
+  "name": "inlay",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "gen:types": "node scripts/gen-types.mjs write",
+    "typecheck": "tsc -p sdk && tsc -p . && tsc -p ui/builder",
+    "test": "npm run typecheck && vitest run",
+    "build:sdk": "esbuild ui/disc-sdk/src/main.ts --bundle --format=iife --minify --target=es2022 --legal-comments=none --outfile=ui/disc-sdk/dist/disc-sdk.js",
+    "build:builder": "vite build --config ui/builder/vite.config.ts",
+    "build": "npm run build:sdk && npm run build:builder",
+    "sample": "node scripts/make-sample.mjs artifacts/sample/src"
+  },
+  "devDependencies": {
+    "@codemirror/autocomplete": "6.20.3",
+    "@codemirror/commands": "6.11.1",
+    "@codemirror/lang-css": "6.3.1",
+    "@codemirror/lang-html": "6.4.12",
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/lang-json": "6.0.2",
+    "@codemirror/language": "6.12.4",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.13",
+    "@fontsource-variable/geist": "5.3.0",
+    "@fontsource-variable/geist-mono": "5.3.0",
+    "@lezer/highlight": "1.2.5",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "axe-core": "4.14.0",
+    "esbuild": "0.28.2",
+    "json-schema-to-typescript": "16.0.0",
+    "playwright-core": "1.64.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.2",
+    "vitest": "5.0.5"
+  }
+}

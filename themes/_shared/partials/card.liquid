@@ -1,0 +1,20 @@
+{%- comment -%}
+  One cover in a row (menu §4.6 and collections): film 2:3, album/photo square, game 16:9. Focusing it moves the hero
+  and cross-fades the background (assets/ds.js reads the data-* attributes).
+{%- endcomment -%}
+{%- assign shape = 'poster' -%}{%- assign art = item.cover -%}{%- assign bg = item.backdrop | default: item.cover -%}{%- assign meta = '' -%}
+{%- case item.type -%}
+  {%- when 'movie' -%}{%- capture meta -%}{{ item.year }}{% if item.genres %} · {{ item.genres | first }}{% endif %}{% if item.media.durationSec %} · {{ item.media.durationSec | duration }}{% endif %}{%- endcapture -%}
+  {%- when 'series' -%}{%- capture meta -%}{{ item.yearFrom }}{% if item.genres %} · {{ item.genres | first }}{% endif %}{%- endcapture -%}
+  {%- when 'album' -%}{%- assign shape = 'square' -%}{%- capture meta -%}{{ item.artist }}{% if item.artist and item.year %} · {% endif %}{{ item.year }}{%- endcapture -%}
+  {%- when 'gallery' -%}{%- assign shape = 'square' -%}{%- assign art = item.cover | default: item.photos.first.thumb -%}{%- assign bg = item.photos.first.file -%}{%- capture meta -%}{{ 'ui.photos' | t: item.photos.size }}{%- endcapture -%}
+  {%- when 'app' -%}{%- assign shape = 'wide' -%}{%- assign art = item.backdrop | default: item.cover | default: item.icon -%}{%- capture meta -%}{% if item.version %}{{ 'ui.version' | t: item.version }}{% endif %}{%- endcapture -%}
+  {%- when 'file' -%}{%- assign shape = 'wide' -%}{%- capture meta -%}{{ 'ui.document' | t }}{%- endcapture -%}
+{%- endcase -%}
+{%- assign summary = item.overview | default: item.description | default: item.notes | split: '. ' | first -%}
+<button class="card {{ shape }}{% if item.type == 'album' %} disc-out{% endif %}" data-open="{{ item.id }}" data-title="{{ item.title }}" data-meta="{{ meta | strip }}"
+        data-summary="{{ summary }}" data-bg="{% if bg %}{{ bg | relurl }}{% endif %}" aria-label="{{ item.title }}">
+  {%- if art -%}<img src="{{ art | relurl }}" alt="" loading="lazy">{%- endif -%}
+  {%- if shape == 'wide' or art == nil -%}<span class="label">{{ item.title }}</span>{%- endif -%}
+  <span class="progress" data-progress-for="{{ item.id }}" hidden><i></i></span>
+</button>

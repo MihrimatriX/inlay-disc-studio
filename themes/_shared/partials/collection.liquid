@@ -1,0 +1,29 @@
+{%- comment -%}
+  Collections (§7.0): 2+ movies → posters with "Devam et"; 2+ albums → square covers with "Tümünü karışık çal";
+  2+ galleries → square covers. Same stage as Sinema; the background follows the selection.
+{%- endcomment -%}
+{%- assign kind = disc.home.kind -%}
+{%- assign first = nil -%}
+{%- for item in all_items -%}{%- if item.type == kind and first == nil -%}{%- assign first = item -%}{%- endif -%}{%- endfor -%}
+{%- assign fbg = first.backdrop | default: first.cover -%}
+<section class="view movie collection" id="v-collection" data-kind="collection" data-label="{% case kind %}{% when 'movie' %}{{ 'ui.allMovies' | t }}{% when 'album' %}{{ 'ui.allAlbums' | t }}{% else %}{{ 'ui.allGalleries' | t }}{% endcase %}" hidden>
+  <img class="stage-img" data-bg-a {% if fbg %}src="{{ fbg | relurl }}"{% endif %} alt="">
+  <img class="stage-img fade" data-bg-b alt="">
+  <div class="shade" aria-hidden="true"></div>
+  <p class="brand">{{ disc.title }}</p>
+  <div class="corner"><button class="ghost" data-sheet="s-about">{{ 'ui.about' | t }}</button></div>
+  <section class="hero">
+    <span class="meta" data-hero-meta></span>
+    <h1 class="title" data-hero-title>{{ first.title }}</h1>
+    <p class="summary" data-hero-summary></p>
+    <div class="actions">
+      {%- if kind == 'movie' -%}<button class="btn primary" data-resume-latest hidden><svg><use href="#i-play"/></svg><span></span></button>{%- endif -%}
+      {%- if kind == 'album' -%}<button class="btn primary" data-shuffle-all><svg><use href="#i-shuffle"/></svg><span>{{ 'ui.shuffleAll' | t }}</span></button>{%- endif -%}
+    </div>
+  </section>
+  <div class="rows">
+    <div class="row">
+      {%- for item in all_items -%}{%- if item.type == kind -%}{%- include 'partials/card' -%}{%- endif -%}{%- endfor -%}
+    </div>
+  </div>
+</section>

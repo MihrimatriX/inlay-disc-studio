@@ -1,0 +1,68 @@
+{%- comment -%} "Sinema" (design/screens/t1-film, §4.2). Variant "Sade": flat stage + poster. {%- endcomment -%}
+{%- assign bg = item.backdrop | default: item.cover -%}
+{%- assign summary = item.overview | split: '. ' | first -%}
+{%- assign last = summary | slice: -1 -%}
+{%- assign directors = item.crew | where: 'job', 'Director' | map: 'name' | join: ', ' -%}
+{%- assign screenplay = item.crew | where: 'job', 'Screenplay' -%}
+{%- assign writers = item.crew | where: 'job', 'Writer' | concat: screenplay | map: 'name' | uniq | join: ', ' -%}
+{%- assign about = false -%}
+{%- if item.overview.size > summary.size or directors != blank or writers != blank or item.ratings -%}{%- assign about = true -%}{%- endif -%}
+<section class="view movie {% if settings.variant == 'plain' %}plain{% endif %}" id="v-{{ item.id }}" data-kind="movie" data-label="{{ item.title }}" hidden>
+  {%- if bg -%}<img class="stage-img" src="{{ bg | relurl }}" alt="">{%- endif -%}
+  {%- if item.cover -%}<img class="poster-side" src="{{ item.cover | relurl }}" alt="">{%- endif -%}
+  <div class="shade" aria-hidden="true"></div>
+  {%- include 'partials/top' -%}
+  <section class="hero">
+    <span class="meta">{{ item.year }}{% if item.genres %} · {{ item.genres | first }}{% endif %}{% if item.media.durationSec %} · {{ item.media.durationSec | duration }}{% endif %}{% if item.certification %} · {{ item.certification }}{% endif %}{% if item.ratings.imdb %} · IMDb {{ item.ratings.imdb }}{% endif %}</span>
+    {%- if item.logo -%}<h1 class="title"><img class="logo" src="{{ item.logo | relurl }}" alt="{{ item.title }}"></h1>
+    {%- else -%}<h1 class="title{% if item.title.size > 22 %} long{% endif %}">{{ item.title }}</h1>{%- endif -%}
+    {%- if summary != blank -%}<p class="summary">{{ summary }}{% unless '.!?…' contains last %}.{% endunless %}</p>{%- endif -%}
+    <div class="actions">
+      {%- for id in item.actions -%}{%- if forloop.first -%}
+      <button class="btn primary" data-action="{{ id }}" data-resume-for="{{ item.id }}"><svg><use href="#i-play"/></svg><span>{{ 'ui.watch' | t }}</span></button>
+      {%- endif -%}{%- endfor -%}
+      {%- if item.chapters or item.extras or item.trailer or item.cast or about -%}
+      <button class="btn" data-sheet="s-{{ item.id }}">{% if item.chapters %}{{ 'ui.chapters' | t }}{% else %}{{ 'ui.details' | t }}{% endif %}</button>
+      {%- endif -%}
+    </div>
+  </section>
+  <div class="sheet" id="s-{{ item.id }}" role="dialog" aria-label="{{ item.title }}">
+    {%- if item.chapters -%}
+    <h2>{{ 'ui.chapters' | t }}</h2>
+    <div class="strip">
+      {%- for c in item.chapters -%}
+      <button class="chapter" data-play="{{ item.id }}" data-start="{{ c.startSec }}">
+        {%- if c.thumb -%}<img src="{{ c.thumb | relurl }}" alt="" loading="lazy">{%- else -%}<div class="thumb-ph"></div>{%- endif -%}
+        <span>{{ c.title }}</span><small>{{ c.startSec | clock }}</small>
+      </button>
+      {%- endfor -%}
+    </div>
+    {%- endif -%}
+    {%- if about -%}
+    <h2{% if item.chapters %} style="margin-top:1.5rem"{% endif %}>{{ 'ui.about' | t }}</h2>
+    <div class="about" tabindex="0">
+      {%- if item.overview -%}<p>{{ item.overview }}</p>{%- endif -%}
+      {%- if directors != blank -%}<p><b>{{ 'ui.director' | t }}</b>{{ directors }}</p>{%- endif -%}
+      {%- if writers != blank -%}<p><b>{{ 'ui.writer' | t }}</b>{{ writers }}</p>{%- endif -%}
+      {%- include 'partials/scores' -%}
+    </div>
+    {%- endif -%}
+    {%- if item.trailer or item.extras -%}
+    <h2 style="margin-top:1.5rem">{{ 'ui.extras' | t }}</h2>
+    <div class="strip">
+      {%- if item.trailer -%}<button class="chapter" data-play-file="{{ item.trailer.file }}"><div class="thumb-ph"></div><span>{{ 'ui.trailer' | t }}</span><small>{{ item.trailer.durationSec | clock }}</small></button>{%- endif -%}
+      {%- for x in item.extras -%}
+      <button class="chapter" data-play-file="{{ x.file }}"><div class="thumb-ph"></div><span>{{ x.file | split: '/' | last | split: '.' | first }}</span><small>{{ x.durationSec | clock }}</small></button>
+      {%- endfor -%}
+    </div>
+    {%- endif -%}
+    {%- if item.cast and settings.showCast != false -%}
+    <h2 style="margin-top:1.5rem">{{ 'ui.cast' | t }}</h2>
+    <div class="people">
+      {%- for p in item.cast -%}
+      <div class="person">{%- if p.photo -%}<img src="{{ p.photo | relurl }}" alt="" loading="lazy">{%- else -%}<div class="ph"></div>{%- endif -%}{{ p.name }}<br><small>{{ p.character }}</small></div>
+      {%- endfor -%}
+    </div>
+    {%- endif -%}
+  </div>
+</section>

@@ -1,0 +1,50 @@
+/* Builder design tokens (design-prompt.md §2). Dark theme is the default; the accent follows Ayarlar. */
+:root {
+  --bg: #0f1013;
+  --bg-light: radial-gradient(70% 60% at 0% 0%, #20222a, transparent 70%);
+  --surface: linear-gradient(180deg, #17181c, #131417);
+  --surface-line: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --control: rgba(255, 255, 255, 0.06);
+  --control-line: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --nav-active: rgba(255, 255, 255, 0.07);
+  --divider: rgba(255, 255, 255, 0.05);
+  --text: #ececef;
+  --text-2: #c9cad1;
+  --muted: #9a9ca6;
+  /* design-prompt §2.1 says #6d6f78; that is 3.5:1 on the panels, under the 4.5:1 §1.6 requires. */
+  --faint: #84868f;
+  --ok: #4ade80;
+  --warn: #fbbf24;
+
+  --accent: #ff5a1f;
+  --accent-from: #ff8a3d;
+  --accent-rgb: 255, 106, 43;
+  --accent-pill: #ffb38a;
+  --accent-grad: linear-gradient(135deg, var(--accent-from), var(--accent));
+  --accent-soft: linear-gradient(90deg, rgba(var(--accent-rgb), 0.14), rgba(var(--accent-rgb), 0.02));
+  --glow: radial-gradient(50% 50% at 100% 100%, rgba(var(--accent-rgb), 0.07), transparent 70%);
+
+  --r-panel: 18px;
+  --r-control: 10px;
+  --r-button: 12px;
+  --shadow-panel: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+  --shadow-primary: 0 10px 24px -10px var(--accent), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --shadow-dialog: 0 40px 100px -30px rgba(0, 0, 0, 0.9);
+
+  --font: "Geist Variable", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  --mono: "Geist Mono Variable", "Cascadia Mono", Consolas, monospace;
+}
+
+:root[data-accent="blue"] {
+  --accent: #4c7dff;
+  --accent-from: #7c9dff;
+  --accent-rgb: 76, 125, 255;
+  --accent-pill: #b3c6ff;
+}
+
+:root[data-accent="purple"] {
+  --accent: #a855f7;
+  --accent-from: #c084fc;
+  --accent-rgb: 168, 85, 247;
+  --accent-pill: #dcc0fd;
+}

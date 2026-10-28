@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>InlaySetup</AssemblyName>
+    <RootNamespace>Inlay.Setup</RootNamespace>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon>Inlay.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- A few MB of native code around the payload: no .NET runtime is needed to install the (self-contained) builder. -->
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <IlcOptimizationPreference>Size</IlcOptimizationPreference>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inlay.Core\Inlay.Core.csproj" />
+  </ItemGroup>
+  <!-- scripts/package-installer.ps1 passes the zipped builder; without it this builds the uninstaller. -->
+  <ItemGroup Condition="'$(InlayPayload)' != ''">
+    <EmbeddedResource Include="$(InlayPayload)" LogicalName="payload.zip" />
+  </ItemGroup>
+</Project>

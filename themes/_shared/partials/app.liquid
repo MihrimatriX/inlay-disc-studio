@@ -1,0 +1,69 @@
+{%- comment -%} "Oyun" (design/screens/t4-oyun, §4.5): hero art, compatibility line, Kur + Kurmadan oyna, three screenshots. {%- endcomment -%}
+{%- assign bg = item.backdrop | default: item.cover | default: item.screenshots.first -%}
+{%- assign install = nil -%}{%- assign run = nil -%}
+{%- for id in item.actions -%}
+  {%- assign a = actions[id] -%}
+  {%- if a.kind == 'install' and install == nil -%}{%- assign install = a -%}{%- endif -%}
+  {%- if a.kind == 'run' and run == nil -%}{%- assign run = a -%}{%- endif -%}
+{%- endfor -%}
+{%- assign summary = item.description | split: '. ' | first -%}
+{%- assign last = summary | slice: -1 -%}
+{%- assign req = item.requirements -%}
+{%- assign specs = false -%}
+{%- if req.os or req.cpu or req.gpu or req.ramGb or req.directx -%}{%- assign specs = true -%}{%- endif -%}
+{%- assign details = specs -%}
+{%- if item.description.size > summary.size or item.ratings -%}{%- assign details = true -%}{%- endif -%}
+<section class="view game" id="v-{{ item.id }}" data-kind="app" data-label="{{ item.title }}" hidden>
+  {%- if bg -%}<img class="stage-img" src="{{ bg | relurl }}" alt="">{%- endif -%}
+  <div class="shade" aria-hidden="true"></div>
+  {%- include 'partials/top' -%}
+  <section class="hero">
+    <span class="meta">{% for t in item.tags limit: 2 %}{{ t }} · {% endfor %}{% if item.year %}{{ item.year }} · {% endif %}{% if item.version %}{{ 'ui.version' | t: item.version }}{% else %}{{ item.publisher }}{% endif %}</span>
+    {%- if item.logo -%}<h1 class="title"><img class="logo" src="{{ item.logo | relurl }}" alt="{{ item.title }}"></h1>
+    {%- else -%}<h1 class="title{% if item.title.size > 22 %} long{% endif %}">{{ item.title }}</h1>{%- endif -%}
+    {%- if summary != blank -%}<p class="summary">{{ summary }}{% unless '.!?…' contains last %}.{% endunless %}</p>{%- endif -%}
+    <div class="notes">
+      <span class="note muted" data-compat data-ram="{{ req.ramGb }}" data-disk="{{ item.installSizeBytes }}" data-disk-gb="{{ req.diskGb }}"></span>
+      {%- if details -%}<button class="link" data-sheet="s-{{ item.id }}">{% if specs %}{{ 'ui.requirements' | t }}{% else %}{{ 'ui.details' | t }}{% endif %}</button>{%- endif -%}
+    </div>
+    {%- if item.signature and item.signature.signed == false -%}<span class="note warn"><svg><use href="#i-warn"/></svg>{{ 'ui.unsigned' | t }}</span>{%- endif -%}
+    <div class="actions">
+      {%- if install -%}
+      <button class="btn primary" data-action="{{ install.id }}" data-installs="{{ item.id }}"{% if run %} data-then="{{ run.id }}"{% endif %}><svg><use href="#i-install"/></svg><span>{{ 'ui.install' | t }}</span></button>
+      {%- if run -%}<button class="btn" data-action="{{ run.id }}">{{ 'ui.playWithoutInstall' | t }}</button>{%- endif -%}
+      {%- elsif run -%}
+      <button class="btn primary" data-action="{{ run.id }}"><svg><use href="#i-play"/></svg><span>{% if item.category == 'game' %}{{ 'ui.playGame' | t }}{% else %}{{ 'ui.start' | t }}{% endif %}</span></button>
+      {%- endif -%}
+    </div>
+  </section>
+  {%- if item.screenshots and settings.showScreenshots != false -%}
+  <div class="shots" role="group" aria-label="{{ 'ui.photos' | t: item.screenshots.size }}">
+    {%- for s in item.screenshots limit: 3 -%}
+    <button class="shot" data-shot="{{ forloop.index0 }}" data-app="{{ item.id }}" aria-label="{{ item.title }} · {{ forloop.index }}"><img src="{{ s | relurl }}" alt="" loading="lazy"></button>
+    {%- endfor -%}
+  </div>
+  <script type="application/json" id="g-{{ item.id }}">{"photos":[{% for s in item.screenshots %}{"file":{{ s | json }},"kind":"image"}{% unless forloop.last %},{% endunless %}{% endfor %}]}</script>
+  {%- endif -%}
+  {%- if details -%}
+  <div class="sheet" id="s-{{ item.id }}" role="dialog" aria-label="{{ item.title }}">
+    {%- if item.description.size > summary.size or item.ratings -%}
+    <h2>{{ 'ui.about' | t }}</h2>
+    <div class="about" tabindex="0">
+      {%- if item.description.size > summary.size -%}<p>{{ item.description }}</p>{%- endif -%}
+      {%- include 'partials/scores' -%}
+    </div>
+    {%- endif -%}
+    {%- if specs -%}
+    <h2 style="margin-top:1.5rem">{{ 'ui.requirements' | t }}</h2>
+    <dl class="specs" tabindex="0">
+      {%- if req.os -%}<dt>{{ 'ui.req.os' | t }}</dt><dd>{{ req.os }}</dd>{%- endif -%}
+      {%- if req.cpu -%}<dt>{{ 'ui.req.cpu' | t }}</dt><dd>{{ req.cpu }}</dd>{%- endif -%}
+      {%- if req.gpu -%}<dt>{{ 'ui.req.gpu' | t }}</dt><dd>{{ req.gpu }}</dd>{%- endif -%}
+      {%- if req.ramGb -%}<dt>{{ 'ui.req.ram' | t }}</dt><dd>{{ req.ramGb }} GB</dd>{%- endif -%}
+      {%- if req.directx -%}<dt>DirectX</dt><dd>{{ req.directx }}</dd>{%- endif -%}
+      {%- if req.diskGb -%}<dt>{{ 'ui.req.disk' | t }}</dt><dd>{{ req.diskGb }} GB</dd>{%- endif -%}
+    </dl>
+    {%- endif -%}
+  </div>
+  {%- endif -%}
+</section>

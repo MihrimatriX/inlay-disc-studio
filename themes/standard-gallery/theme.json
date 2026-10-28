@@ -1,0 +1,82 @@
+{
+  "$schema": "../../schemas/theme.schema.json",
+  "id": "ds.standard.gallery",
+  "name": "Galeri",
+  "version": "1.0.0",
+  "author": "Inlay Disc Studio",
+  "description": "Açık zemin, kenardan kenara mozaik ve slayt gösterisi.",
+  "license": "MIT",
+  "modes": [
+    "gallery",
+    "mixed"
+  ],
+  "engine": "liquid",
+  "entry": "index.liquid",
+  "partials": [
+    "partials/views.liquid",
+    "partials/menu.liquid",
+    "partials/collection.liquid",
+    "partials/movie.liquid",
+    "partials/series.liquid",
+    "partials/album.liquid",
+    "partials/gallery.liquid",
+    "partials/app.liquid",
+    "partials/bundle.liquid",
+    "partials/file.liquid",
+    "partials/card.liquid",
+    "partials/top.liquid",
+    "partials/about.liquid",
+    "partials/icons.liquid"
+  ],
+  "minLauncher": "0.1.0",
+  "capabilities": [
+    "play",
+    "playlist",
+    "slideshow",
+    "run",
+    "install",
+    "openFolder",
+    "url",
+    "gamepad",
+    "intro",
+    "fullscreen"
+  ],
+  "fonts": [
+    {
+      "family": "Outfit",
+      "file": "fonts/Outfit-latin.woff2",
+      "weight": "100 900"
+    },
+    {
+      "family": "Outfit",
+      "file": "fonts/Outfit-latin-ext.woff2",
+      "weight": "100 900"
+    }
+  ],
+  "settings": {
+    "columns": {
+      "type": "select",
+      "label": "Sütun sayısı",
+      "group": "Yerleşim",
+      "default": "4",
+      "options": [
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        },
+        {
+          "value": "5",
+          "label": "5"
+        }
+      ]
+    }
+  },
+  "budget": {
+    "maxAssetsMb": 4,
+    "maxFirstPaintMs": 800
+  }
+}

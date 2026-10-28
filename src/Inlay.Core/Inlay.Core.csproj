@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Referenced by the NativeAOT launcher: trim/AOT analyzers must stay clean. -->
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Shared with the React builder and the Liquid `t` filter: one source of user-facing text. -->
+    <EmbeddedResource Include="..\..\i18n\*.json" LogicalName="i18n.%(Filename).json" />
+  </ItemGroup>
+</Project>

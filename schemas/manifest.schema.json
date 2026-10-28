@@ -1,0 +1,1393 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://discstudio.local/schemas/manifest.v1.json",
+  "title": "Disc Studio Manifest v1",
+  "description": "Builder tarafından üretilen ve diskte .disc/manifest.json olarak duran veri sözleşmesi. Launcher ve şablonlar YALNIZCA bu dosyayı okur.",
+  "type": "object",
+  "required": [
+    "version",
+    "disc",
+    "theme",
+    "sections",
+    "items",
+    "actions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "const": 1
+    },
+    "disc": {
+      "type": "object",
+      "required": [
+        "label",
+        "title",
+        "media",
+        "createdAt",
+        "builder",
+        "home"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "maxLength": 32,
+          "description": "ISO9660/UDF volume label ve autorun.inf label= değeri."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Menüde görünen başlık."
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "media": {
+          "enum": [
+            "cd700",
+            "dvd5",
+            "dvd9"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "builder": {
+          "type": "string",
+          "description": "Örn. \"DiscStudio 0.1.0\""
+        },
+        "locale": {
+          "type": "string",
+          "default": "tr-TR"
+        },
+        "icon": {
+          "$ref": "#/$defs/relPath"
+        },
+        "logo": {
+          "$ref": "#/$defs/relPath"
+        },
+        "intro": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "video": {
+              "$ref": "#/$defs/relPath"
+            },
+            "music": {
+              "$ref": "#/$defs/relPath"
+            },
+            "durationMs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "skippable": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "featured": {
+          "$ref": "#/$defs/id",
+          "description": "Hero alanında öne çıkan öğe."
+        },
+        "autoplay": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disk takılınca öne çıkan öğe menü beklemeden oynatılır (builder: Disk takılınca › Hemen oynat)."
+        },
+        "remote": {
+          "type": "boolean",
+          "default": true,
+          "description": "Kumanda/oyun kolu ile gezinme. false ise menü yalnızca klavye ve fareyle gezilir."
+        },
+        "home": {
+          "type": "object",
+          "required": [
+            "view"
+          ],
+          "additionalProperties": false,
+          "description": "Diskin açılış görünümü. Builder içeriğe göre seçer (prompt.md 7.0 karar tablosu); kullanıcı değiştirebilir.",
+          "properties": {
+            "view": {
+              "enum": [
+                "menu",
+                "item",
+                "collection",
+                "series",
+                "bundle"
+              ],
+              "description": "menu: karışık ana menü; item: tek öğenin sayfası; collection: aynı türden çok öğe ızgarası; series: dizi sayfası; bundle: program paketi listesi."
+            },
+            "item": {
+              "$ref": "#/$defs/id",
+              "description": "view=item veya series ise açılacak öğe."
+            },
+            "kind": {
+              "enum": [
+                "movie",
+                "album",
+                "app",
+                "gallery"
+              ],
+              "description": "view=collection ise hangi tür."
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "view": {
+                    "enum": [
+                      "item",
+                      "series"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "item"
+                ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "view": {
+                    "const": "collection"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "kind"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "required": [
+        "package",
+        "version",
+        "palette"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "package": {
+          "type": "string",
+          "description": "theme.json içindeki id (örn. ds.standard.mixed)."
+        },
+        "version": {
+          "$ref": "#/$defs/semver"
+        },
+        "settings": {
+          "type": "object",
+          "description": "theme.json settings tanımlarına göre kullanıcının seçtiği değerler.",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          }
+        },
+        "palette": {
+          "$ref": "#/$defs/palette"
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "kind": {
+            "enum": [
+              "movie",
+              "series",
+              "album",
+              "gallery",
+              "app",
+              "file"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "layout": {
+            "enum": [
+              "row",
+              "grid",
+              "hero",
+              "list"
+            ],
+            "default": "row"
+          },
+          "hidden": {
+            "type": "boolean",
+            "default": false
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            }
+          }
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/movie"
+          },
+          {
+            "$ref": "#/$defs/series"
+          },
+          {
+            "$ref": "#/$defs/album"
+          },
+          {
+            "$ref": "#/$defs/gallery"
+          },
+          {
+            "$ref": "#/$defs/app"
+          },
+          {
+            "$ref": "#/$defs/file"
+          }
+        ]
+      }
+    },
+    "actions": {
+      "type": "array",
+      "description": "Launcher'ın çalıştırmasına İZİN VERİLEN tek liste. Sayfa yalnızca bu id'leri çağırabilir.",
+      "items": {
+        "$ref": "#/$defs/action"
+      }
+    },
+    "credits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "logo": {
+            "$ref": "#/$defs/relPath"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    },
+    "licenses": {
+      "type": "array",
+      "description": "Diske gömülen 3. parti bileşenler (LibVLC LGPL vb.).",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "license",
+          "file"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "license": {
+            "type": "string"
+          },
+          "file": {
+            "$ref": "#/$defs/relPath"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$"
+    },
+    "hex": {
+      "type": "string",
+      "pattern": "^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+    },
+    "relPath": {
+      "type": "string",
+      "description": "Disk köküne göre göreli yol, '/' ayraçlı. Mutlak yol, '..' veya URL yasak.",
+      "pattern": "^(?![a-zA-Z]:)(?!/)(?!.*\\.\\.)(?!.*://)[^<>:\"|?*]+$"
+    },
+    "ratings": {
+      "type": "object",
+      "description": "Dış puanlar (OMDb: IMDb, Rotten Tomatoes, Metacritic; oyunlarda Steam'in Metacritic puanı).",
+      "additionalProperties": false,
+      "properties": {
+        "imdb": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "rottenTomatoes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "metacritic": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "lang": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$"
+    },
+    "palette": {
+      "type": "object",
+      "required": [
+        "bg",
+        "surface",
+        "accent",
+        "text",
+        "muted"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "bg": {
+          "$ref": "#/$defs/hex"
+        },
+        "surface": {
+          "$ref": "#/$defs/hex"
+        },
+        "accent": {
+          "$ref": "#/$defs/hex"
+        },
+        "accentText": {
+          "$ref": "#/$defs/hex"
+        },
+        "text": {
+          "$ref": "#/$defs/hex"
+        },
+        "muted": {
+          "$ref": "#/$defs/hex"
+        },
+        "source": {
+          "enum": [
+            "auto",
+            "manual"
+          ],
+          "default": "auto"
+        }
+      }
+    },
+    "playback": {
+      "type": "object",
+      "description": "Builder'ın kodek analizine göre verdiği karar.",
+      "required": [
+        "engine"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "engine": {
+          "enum": [
+            "html",
+            "libvlc",
+            "shell"
+          ],
+          "description": "html: WebView2 <video>/<audio>; libvlc: gömülü LibVLC penceresi; shell: varsayılan uygulama."
+        },
+        "fallback": {
+          "enum": [
+            "libvlc",
+            "shell",
+            "none"
+          ],
+          "default": "shell"
+        },
+        "normalized": {
+          "type": "boolean",
+          "description": "Builder remux/transcode yaptı mı?"
+        },
+        "original": {
+          "$ref": "#/$defs/relPath",
+          "description": "Normalize edildiyse orijinal dosya (diskte tutulduysa)."
+        }
+      }
+    },
+    "mediaFile": {
+      "type": "object",
+      "required": [
+        "file",
+        "sizeBytes",
+        "playback"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "$ref": "#/$defs/relPath"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "container": {
+          "type": "string"
+        },
+        "durationSec": {
+          "type": "number",
+          "minimum": 0
+        },
+        "video": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "codec": {
+              "type": "string"
+            },
+            "width": {
+              "type": "integer"
+            },
+            "height": {
+              "type": "integer"
+            },
+            "fps": {
+              "type": "number"
+            },
+            "hdr": {
+              "enum": [
+                "none",
+                "hdr10",
+                "hlg",
+                "dolby-vision"
+              ]
+            }
+          }
+        },
+        "audio": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "codec"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "codec": {
+                "type": "string"
+              },
+              "lang": {
+                "$ref": "#/$defs/lang"
+              },
+              "channels": {
+                "type": "number"
+              },
+              "title": {
+                "type": "string"
+              },
+              "default": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "subtitles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "lang"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "lang": {
+                "$ref": "#/$defs/lang"
+              },
+              "file": {
+                "$ref": "#/$defs/relPath",
+                "description": "Harici altyazı (WebVTT'ye dönüştürülmüş olmalı)."
+              },
+              "embedded": {
+                "type": "integer",
+                "description": "Gömülü track index'i."
+              },
+              "forced": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "playback": {
+          "$ref": "#/$defs/playback"
+        }
+      }
+    },
+    "itemBase": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "cover": {
+          "$ref": "#/$defs/relPath"
+        },
+        "palette": {
+          "$ref": "#/$defs/palette"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "description": "Bu öğede gösterilecek action id'leri (sıra = buton sırası; ilki birincil).",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        }
+      }
+    },
+    "movie": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/itemBase"
+        }
+      ],
+      "type": "object",
+      "required": [
+        "type",
+        "media"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "movie"
+        },
+        "originalTitle": {
+          "type": "string"
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1880,
+          "maximum": 2100
+        },
+        "overview": {
+          "type": "string"
+        },
+        "tagline": {
+          "type": "string"
+        },
+        "genres": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rating": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "ratings": {
+          "$ref": "#/$defs/ratings"
+        },
+        "certification": {
+          "type": "string"
+        },
+        "backdrop": {
+          "$ref": "#/$defs/relPath"
+        },
+        "logo": {
+          "$ref": "#/$defs/relPath"
+        },
+        "cast": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "character": {
+                "type": "string"
+              },
+              "photo": {
+                "$ref": "#/$defs/relPath"
+              }
+            }
+          }
+        },
+        "crew": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "job"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "job": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "chapters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "title",
+              "startSec"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "startSec": {
+                "type": "number"
+              },
+              "thumb": {
+                "$ref": "#/$defs/relPath"
+              }
+            }
+          }
+        },
+        "trailer": {
+          "$ref": "#/$defs/mediaFile"
+        },
+        "media": {
+          "$ref": "#/$defs/mediaFile"
+        },
+        "extras": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/mediaFile"
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "provider": {
+              "enum": [
+                "tmdb",
+                "nfo",
+                "manual"
+              ]
+            },
+            "externalId": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "album": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/itemBase"
+        }
+      ],
+      "type": "object",
+      "required": [
+        "type",
+        "tracks"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "album"
+        },
+        "artist": {
+          "type": "string"
+        },
+        "year": {
+          "type": "integer"
+        },
+        "genre": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "booklet": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/relPath"
+          }
+        },
+        "audioCd": {
+          "type": "boolean",
+          "description": "CD-Extra: parçalar ayrıca CD-DA olarak ilk oturuma yazıldı mı?"
+        },
+        "tracks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "no",
+              "title",
+              "media"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "no": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "disc": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "title": {
+                "type": "string"
+              },
+              "artist": {
+                "type": "string"
+              },
+              "lyrics": {
+                "$ref": "#/$defs/relPath",
+                "description": ".lrc (zamanlı) veya .txt"
+              },
+              "media": {
+                "$ref": "#/$defs/mediaFile"
+              }
+            }
+          }
+        }
+      }
+    },
+    "gallery": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/itemBase"
+        }
+      ],
+      "type": "object",
+      "required": [
+        "type",
+        "photos"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "gallery"
+        },
+        "description": {
+          "type": "string"
+        },
+        "dateRange": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "from": {
+              "type": "string",
+              "format": "date"
+            },
+            "to": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        },
+        "slideshow": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "intervalMs": {
+              "type": "integer",
+              "minimum": 1000
+            },
+            "music": {
+              "$ref": "#/$defs/id",
+              "description": "Bir album.tracks[].id"
+            },
+            "transition": {
+              "enum": [
+                "fade",
+                "kenburns",
+                "slide",
+                "none"
+              ]
+            }
+          }
+        },
+        "photos": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "file",
+              "thumb",
+              "width",
+              "height"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "file": {
+                "$ref": "#/$defs/relPath",
+                "description": "Görüntülenecek (WebView2 uyumlu) sürüm: AVIF/WebP/JPEG."
+              },
+              "original": {
+                "$ref": "#/$defs/relPath",
+                "description": "HEIC/RAW/TIFF orijinal (opsiyonel)."
+              },
+              "thumb": {
+                "$ref": "#/$defs/relPath"
+              },
+              "blurhash": {
+                "type": "string"
+              },
+              "width": {
+                "type": "integer"
+              },
+              "height": {
+                "type": "integer"
+              },
+              "kind": {
+                "enum": [
+                  "image",
+                  "video",
+                  "animated"
+                ],
+                "default": "image"
+              },
+              "caption": {
+                "type": "string"
+              },
+              "takenAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "camera": {
+                "type": "string"
+              },
+              "location": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "lat": {
+                    "type": "number"
+                  },
+                  "lon": {
+                    "type": "number"
+                  }
+                }
+              },
+              "media": {
+                "$ref": "#/$defs/mediaFile",
+                "description": "kind=video ise."
+              }
+            }
+          }
+        }
+      }
+    },
+    "app": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/itemBase"
+        }
+      ],
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "app"
+        },
+        "category": {
+          "enum": [
+            "game",
+            "app",
+            "driver",
+            "tool",
+            "runtime",
+            "dlc"
+          ]
+        },
+        "version": {
+          "type": "string"
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1950,
+          "maximum": 2100
+        },
+        "ratings": {
+          "$ref": "#/$defs/ratings"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "icon": {
+          "$ref": "#/$defs/relPath"
+        },
+        "description": {
+          "type": "string"
+        },
+        "backdrop": {
+          "$ref": "#/$defs/relPath"
+        },
+        "logo": {
+          "$ref": "#/$defs/relPath",
+          "description": "Şeffaf oyun logosu (SteamGridDB); şablon başlık yerine gösterir."
+        },
+        "screenshots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/relPath"
+          }
+        },
+        "trailer": {
+          "$ref": "#/$defs/mediaFile"
+        },
+        "installSizeBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requirements": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "os": {
+              "type": "string"
+            },
+            "cpu": {
+              "type": "string"
+            },
+            "ramGb": {
+              "type": "number"
+            },
+            "gpu": {
+              "type": "string"
+            },
+            "diskGb": {
+              "type": "number"
+            },
+            "directx": {
+              "type": "string"
+            },
+            "prerequisites": {
+              "type": "array",
+              "description": "Diskteki ön gereksinimler (VC++ redist, DirectX vb.) – action id listesi.",
+              "items": {
+                "$ref": "#/$defs/id"
+              }
+            }
+          }
+        },
+        "signature": {
+          "type": "object",
+          "description": "Builder'ın Authenticode kontrolü sonucu.",
+          "additionalProperties": false,
+          "properties": {
+            "signed": {
+              "type": "boolean"
+            },
+            "signer": {
+              "type": "string"
+            }
+          }
+        },
+        "bundle": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Program paketi (home.view=bundle) davranışı.",
+          "properties": {
+            "selected": {
+              "type": "boolean",
+              "default": true,
+              "description": "Listede varsayılan seçili mi?"
+            },
+            "required": {
+              "type": "boolean",
+              "default": false,
+              "description": "Seçimi kaldırılamaz (ör. VC++ çalışma zamanı); seçili diğer paketlerden önce kurulur."
+            },
+            "order": {
+              "type": "integer",
+              "description": "Kurulum sırası (küçük önce). Ön gereksinimler her zaman önce."
+            },
+            "silentArgs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Toplu kurulumda sessiz kurulum argümanları (/S, /quiet ...)."
+            }
+          }
+        }
+      }
+    },
+    "file": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/itemBase"
+        }
+      ],
+      "type": "object",
+      "required": [
+        "type",
+        "path"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "file"
+        },
+        "path": {
+          "$ref": "#/$defs/relPath"
+        },
+        "mime": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "sizeBytes": {
+          "type": "integer"
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string"
+        },
+        "icon": {
+          "enum": [
+            "play",
+            "install",
+            "run",
+            "folder",
+            "document",
+            "web",
+            "music",
+            "image",
+            "info",
+            "trailer"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "play",
+            "playlist",
+            "slideshow",
+            "install",
+            "run",
+            "open",
+            "openFolder",
+            "url"
+          ],
+          "description": "play/playlist/slideshow → oynatıcı; install/run → süreç başlat; open → ShellExecute; openFolder → Explorer; url → varsayılan tarayıcı (onaylı)."
+        },
+        "target": {
+          "type": "string",
+          "description": "relPath (çoğu tür), item/track id (play/playlist/slideshow) veya https URL (url)."
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "workingDir": {
+          "$ref": "#/$defs/relPath"
+        },
+        "elevated": {
+          "type": "boolean",
+          "default": false,
+          "description": "true → ShellExecute verb=runas (UAC)."
+        },
+        "confirm": {
+          "type": "string",
+          "description": "Çalıştırmadan önce gösterilecek onay metni."
+        },
+        "closeLauncher": {
+          "enum": [
+            "never",
+            "onStart",
+            "onExit"
+          ],
+          "default": "never"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "url"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "target": {
+                "pattern": "^https://"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "install",
+                  "run",
+                  "open",
+                  "openFolder"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "target"
+            ],
+            "properties": {
+              "target": {
+                "$ref": "#/$defs/relPath"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "play",
+                  "playlist",
+                  "slideshow"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "target"
+            ],
+            "properties": {
+              "target": {
+                "$ref": "#/$defs/id"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "series": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/itemBase"
+        }
+      ],
+      "type": "object",
+      "required": [
+        "type",
+        "seasons"
+      ],
+      "unevaluatedProperties": false,
+      "description": "Bölümlü video (S01E01 kalıbı veya sezon klasörleri).",
+      "properties": {
+        "type": {
+          "const": "series"
+        },
+        "overview": {
+          "type": "string"
+        },
+        "genres": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "yearFrom": {
+          "type": "integer"
+        },
+        "yearTo": {
+          "type": "integer"
+        },
+        "ratings": {
+          "$ref": "#/$defs/ratings"
+        },
+        "backdrop": {
+          "$ref": "#/$defs/relPath"
+        },
+        "logo": {
+          "$ref": "#/$defs/relPath"
+        },
+        "seasons": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "no",
+              "episodes"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "no": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "0 = özel bölümler"
+              },
+              "title": {
+                "type": "string"
+              },
+              "poster": {
+                "$ref": "#/$defs/relPath"
+              },
+              "episodes": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "no",
+                    "title",
+                    "media"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "$ref": "#/$defs/id"
+                    },
+                    "no": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "overview": {
+                      "type": "string"
+                    },
+                    "thumb": {
+                      "$ref": "#/$defs/relPath"
+                    },
+                    "airDate": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "media": {
+                      "$ref": "#/$defs/mediaFile"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "provider": {
+              "enum": [
+                "tmdb",
+                "nfo",
+                "manual"
+              ]
+            },
+            "externalId": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

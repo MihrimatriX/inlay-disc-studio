@@ -1,0 +1,7 @@
+{%- comment -%} Top-left of every page: the back button when there is somewhere to go back to, else the disc's name (§7.0). {%- endcomment -%}
+<div class="brand">
+  <button class="ghost back" data-back hidden><svg><use href="#i-back"/></svg><span></span></button>
+  {%- assign disc_name = disc.subtitle | default: disc.title -%}
+  {%- if item and disc_name == item.title -%}{%- assign disc_name = '' -%}{%- endif -%}
+  {%- if disc_name != '' -%}<span data-disc-name>{{ disc_name }}</span>{%- endif -%}
+</div>
