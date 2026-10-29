@@ -20,6 +20,8 @@ const paths: Record<string, ReactNode> = {
   check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
   undo: <path d="M9 7 4 12l5 5M4 12h11a5 5 0 0 1 0 10h-2" />,
   code: <path d="m9 7-5 5 5 5M15 7l5 5-5 5" />,
+  expand: <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />,
+  shrink: <path d="M9 4v5H4M15 4v5h5M15 20v-5h5M9 20v-5H4" />,
 };
 
 export function Icon({ name, size = 19, stroke = 1.6 }: { name: keyof typeof paths | string; size?: number; stroke?: number }) {

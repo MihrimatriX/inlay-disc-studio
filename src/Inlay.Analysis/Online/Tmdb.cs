@@ -54,14 +54,25 @@ public sealed class Tmdb(MetaHttp http, string key, string language = "tr-TR")
     public Task<KeyCheck> Check(CancellationToken ct) => http.Check(Get("/configuration"), ct);
 
     /// <summary>"Bu film hangisi?": the first three matches (§5.3).</summary>
-    public async Task<IReadOnlyList<MatchCandidate>> SearchMovie(string title, int? year, CancellationToken ct)
-    {
-        var doc = await http.Json(Get("/search/movie", $"&query={Uri.EscapeDataString(title)}{(year is null ? "" : $"&year={year}")}"), ct);
-        return Results(doc, "title", "release_date");
-    }
+    public Task<IReadOnlyList<MatchCandidate>> SearchMovie(string title, int? year, CancellationToken ct) =>
+        Search("/search/movie", title, year is null ? "" : $"&year={year}", "title", "release_date", ct);
 
-    public async Task<IReadOnlyList<MatchCandidate>> SearchShow(string title, CancellationToken ct) =>
-        Results(await http.Json(Get("/search/tv", $"&query={Uri.EscapeDataString(title)}"), ct), "name", "first_air_date");
+    public Task<IReadOnlyList<MatchCandidate>> SearchShow(string title, CancellationToken ct) =>
+        Search("/search/tv", title, "", "name", "first_air_date", ct);
+
+    /// <summary>TMDB wants every word of the query in the title, so a file named differently in its last words
+    /// ("Bir Böceğin Hayatı" for "Bir Böceğin Yaşamı") finds nothing: it is retried a word shorter, down to two words.
+    /// A failed request (offline, 429) is not retried.</summary>
+    async Task<IReadOnlyList<MatchCandidate>> Search(string path, string title, string filter, string titleProp, string dateProp, CancellationToken ct)
+    {
+        var words = title.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        for (var n = words.Length; ; n--)
+        {
+            var doc = await http.Json(Get(path, $"&query={Uri.EscapeDataString(string.Join(' ', words[..n]))}{filter}"), ct);
+            var found = Results(doc, titleProp, dateProp);
+            if (doc is null || found.Count > 0 || n <= 2) return found;
+        }
+    }
 
     static IReadOnlyList<MatchCandidate> Results(JsonDocument? doc, string titleProp, string dateProp) =>
         doc?.RootElement.TryGetProperty("results", out var r) == true

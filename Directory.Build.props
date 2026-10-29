@@ -5,6 +5,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <!-- The one product version: Inlay.exe, Baslat.exe, InlaySetup.exe, disc.builder and scripts/package-installer.ps1 read it. -->
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
   </PropertyGroup>
 </Project>

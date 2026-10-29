@@ -88,7 +88,8 @@ public sealed partial class Session
                 FileItem f => ("file", System.IO.Path.GetExtension(f.Path).TrimStart('.').ToUpperInvariant()),
                 _ => ("file", null),
             };
-            var thumb = item.Cover ?? (item as App)?.Icon ?? (item as Gallery)?.Photos.FirstOrDefault()?.Thumb;
+            // No poster (offline, no key, typed in by hand): the frame the composer took for the backdrop stands in.
+            var thumb = item.Cover ?? (item as App)?.Icon ?? (item as Gallery)?.Photos.FirstOrDefault()?.Thumb ?? (item as Movie)?.Backdrop ?? (item as Series)?.Backdrop;
             rows.Add(new RowView(item.Id, null, item.Title, info, thumb is null ? null : Url(thumb), null, kind, T("builder.kind." + kind),
                 item.Id == _manifest.Disc.Featured || _manifest.Items.Count == 1, Bytes(item), Note(item), card));
             if (item is Movie movie) rows.AddRange(Parts(movie));

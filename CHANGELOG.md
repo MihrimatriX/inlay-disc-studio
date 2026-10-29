@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.1 — Films found by a looser name, frame thumbnails, full-screen preview
+
+- `Tmdb` search: TMDB wants every word of the query in the title, so a file named differently in its last words
+  ("Bir Böceğin Hayatı" for TMDB's "Bir Böceğin Yaşamı") found nothing and the user had to type the film in by hand.
+  A search without results is retried a word shorter, down to two words, for films and series alike; the candidates
+  go to "Bu film hangisi?" as before. A failed request (offline, 429) is not retried.
+- Disk içeriği: a film or series without a poster (no key, offline, typed in by hand) shows the frame taken for its
+  backdrop instead of an empty box.
+- Menu preview: a full-screen button in the corner fills the window with the 16:9 render; Esc or the button leaves.
+- The launcher's media probe waits up to 10 s for playback to start (a cold LibVLC start on a busy CI runner took
+  longer than 3 s).
+
 ## 0.3.0 — OMDb, fanart.tv, key tests, detail pages, ready for physical burns
 
 - `Omdb` / `FanartTv` / `MovieLookup` (`Online/Movies.cs`): after a TMDB match, OMDb adds IMDb, Rotten Tomatoes and

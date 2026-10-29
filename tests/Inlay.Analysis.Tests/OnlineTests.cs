@@ -84,6 +84,19 @@ public sealed class OnlineTests : IDisposable
     }
 
     [Fact]
+    public async Task Tmdb_search_drops_trailing_words_until_something_matches()
+    {
+        _api.On("/search/movie", TmdbSearch).On("Efsanesi", """{"page":1,"results":[]}""");
+        var matches = await new Tmdb(_http, "k").SearchMovie("Kuzey Rüzgârı Efsanesi", null, Ct);
+        matches[0].Title.Should().Be("Kuzey Rüzgârı");
+        _api.Calls.Should().HaveCount(2);
+
+        _api.On("/search/tv", "{}", HttpStatusCode.TooManyRequests);
+        (await new Tmdb(_http, "k").SearchShow("Bir İki Üç Dört", Ct)).Should().BeEmpty();
+        _api.Calls.Should().HaveCount(3, "a failed request is not retried shorter");
+    }
+
+    [Fact]
     public async Task Tmdb_v4_tokens_go_in_the_authorization_header()
     {
         var seen = "";

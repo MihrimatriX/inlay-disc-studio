@@ -229,6 +229,8 @@
   "builder.iso.save": "Save as ISO",
   "builder.menu.title": "Disc menu",
   "builder.menu.preview": "Menu preview",
+  "builder.menu.fullscreen": "Full-screen preview",
+  "builder.menu.exitFullscreen": "Exit full screen (Esc)",
   "builder.menu.editHtml": "Edit as HTML",
   "builder.menu.settings": "Menu settings",
   "builder.menu.template": "Template",

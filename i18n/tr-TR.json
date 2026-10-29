@@ -229,6 +229,8 @@
   "builder.iso.save": "ISO olarak kaydet",
   "builder.menu.title": "Disk menüsü",
   "builder.menu.preview": "Menü önizlemesi",
+  "builder.menu.fullscreen": "Tam ekran önizle",
+  "builder.menu.exitFullscreen": "Tam ekrandan çık (Esc)",
   "builder.menu.editHtml": "HTML olarak düzenle",
   "builder.menu.settings": "Menü ayarları",
   "builder.menu.template": "Şablon",
