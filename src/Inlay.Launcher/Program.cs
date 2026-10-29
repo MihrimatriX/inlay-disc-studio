@@ -63,7 +63,8 @@ static class Program
         using var s = new Player.VlcSession(dir, false, "--vout=dummy", "--aout=dummy");
         s.Play(0, file);
         var st = s.State();
-        for (var i = 0; i < 60 && st.PositionSec < 0.4 && st.Status is not ("ended" or "error"); i++) { Thread.Sleep(50); st = s.State(); }
+        // Up to 10 s: a cold LibVLC start on a busy CI runner can take several seconds; the loop leaves as soon as it plays.
+        for (var i = 0; i < 200 && st.PositionSec < 0.4 && st.Status is not ("ended" or "error"); i++) { Thread.Sleep(50); st = s.State(); }
         Console.WriteLine($"{{\"status\":\"{st.Status}\",\"positionSec\":{st.PositionSec.ToString(System.Globalization.CultureInfo.InvariantCulture)},\"audio\":{st.Audio.Count}}}");
         return st.PositionSec >= 0.3 ? 0 : 1;
     }
